@@ -18,6 +18,7 @@
 	import { ECPair, getNetworkByName, type NetworkNames } from '$lib/bitcoin';
 	import { createLiquidMultisig } from 'pls-liquid';
 	import DropDocument from '$lib/components/DropDocument.svelte';
+	import { page } from '$app/stores';
 
 	let contractsData: Record<string, UnsignedContract> = {};
 
@@ -37,12 +38,17 @@
 		if (await nostrAuth.tryLogin()) {
 			if (!$nostrAuth?.pubkey) return;
 
+			const eventId = $page.url.searchParams.get('eventId');
+
+			const eventIds = eventId ? [eventId] : undefined;
+
 			relayPool.subscribeMany(
 				relayList,
 				[
 					{
 						kinds: [ContractRequestEvent],
-						'#p': [$nostrAuth.pubkey]
+						ids: eventIds,
+						'#p': [$nostrAuth.pubkey],
 					}
 				],
 				{
