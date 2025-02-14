@@ -6,7 +6,10 @@
 	import type { NewContractData } from '../shared';
 	import { broadcastToNostr, nostrAuth } from '$lib/nostr';
 	import { goto } from '$app/navigation';
-	import { ContractRequestEvent, type ContractRequestPayload } from '../../shared';
+	import {
+		ContractRequestEvent,
+		type ContractRequestPayload,
+	} from '../../shared';
 	import { isValidNetworkName } from '$lib/bitcoin';
 
 	let newContract = getContext<Writable<NewContractData>>('contract');
@@ -29,7 +32,7 @@
 
 		if (!isValidNetworkName(network)) return alert('Invalid network');
 
-		const payload = {
+		const contractRequestPayload = {
 			arbitratorPubkeys: arbitrators.map((pub) => pub.slice(-64)),
 			arbitratorsQuorum,
 			clientPubkeys: [clients[0], clients[1]].map((pub) => pub.slice(-64)),
@@ -37,15 +40,21 @@
 			network
 		} satisfies ContractRequestPayload;
 
+		let contractEventId: string = "";
+
 		for (const pubkey of pubkeys) {
-			const encryptedText = await nostrAuth.encryptDM(pubkey, JSON.stringify(payload));
+			const contractRequestEncryptedText = await nostrAuth.encryptDM(pubkey, JSON.stringify(contractRequestPayload));
 
-			const event = await nostrAuth.makeEvent(ContractRequestEvent, encryptedText, [['p', pubkey]]);
+			const contractRequestEvent = await nostrAuth.makeEvent(ContractRequestEvent, contractRequestEncryptedText, [['p', pubkey]]);
 
-			broadcastToNostr(event);
+			if ($nostrAuth?.pubkey === pubkey)
+				contractEventId = contractRequestEvent.id;
+
+
+			broadcastToNostr(contractRequestEvent);
 		}
 
-		goto('/contract/join');
+		goto('/contract/join?eventId=' + contractEventId);
 	}
 </script>
 
