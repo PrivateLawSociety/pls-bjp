@@ -9,6 +9,7 @@
 	import {
 		ContractRequestEvent,
 		type ContractRequestPayload,
+		SendEncryptedDM,
 	} from '../../shared';
 	import { isValidNetworkName } from '$lib/bitcoin';
 
@@ -50,8 +51,16 @@
 			if ($nostrAuth?.pubkey === pubkey)
 				contractEventId = contractRequestEvent.id;
 
+			const contractUrl = `${document.location.origin}/contract/join?=eventId=${contractRequestEvent.id}`;
+
+			const notifyOnDmText = `Hey, I created a PLS contract and want you to verify it. You can access it on this link: ${contractUrl}`;
+
+			const notifyOnDmEncryptedText = await nostrAuth.encryptDM(pubkey, notifyOnDmText);
+
+			const notifyOnDmEvent = await nostrAuth.makeEvent(SendEncryptedDM, notifyOnDmEncryptedText, [['p', pubkey]]);
 
 			broadcastToNostr(contractRequestEvent);
+			broadcastToNostr(notifyOnDmEvent);
 		}
 
 		goto('/contract/join?eventId=' + contractEventId);
