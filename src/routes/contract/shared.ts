@@ -20,3 +20,6 @@ export interface ContractApprovalPayload {
 // see https://nips.nostr.com/1#kinds
 export const ContractRequestEvent = 16970;
 export const ContractApprovalEvent = 16971;
+
+// event to send encrypted DM
+export const SendEncryptedDM = 4;
