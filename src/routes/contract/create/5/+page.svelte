@@ -51,7 +51,7 @@
 			if ($nostrAuth?.pubkey === pubkey)
 				contractEventId = contractRequestEvent.id;
 
-			const contractUrl = `${document.location.origin}/contract/join?=eventId=${contractRequestEvent.id}`;
+			const contractUrl = `${document.location.origin}/contract/join?eventId=${contractRequestEvent.id}`;
 
 			const notifyOnDmText = `Hey, I created a PLS contract and want you to verify it. You can access it on this link: ${contractUrl}`;
 
