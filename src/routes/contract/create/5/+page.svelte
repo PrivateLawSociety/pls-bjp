@@ -4,14 +4,14 @@
 	import { getContext } from 'svelte';
 	import type { Writable } from 'svelte/store';
 	import type { NewContractData } from '../shared';
-	import { broadcastToNostr, nostrAuth } from '$lib/nostr';
+	import { broadcastToNostr, nostrAuth, nostrEncryptDmFactory } from '$lib/nostr';
 	import { goto } from '$app/navigation';
 	import {
 		ContractRequestEvent,
 		type ContractRequestPayload,
-		SendEncryptedDM,
 	} from '../../shared';
 	import { isValidNetworkName } from '$lib/bitcoin';
+	import { generateSecretKey, getPublicKey } from 'nostr-tools';
 
 	let newContract = getContext<Writable<NewContractData>>('contract');
 
@@ -33,6 +33,10 @@
 
 		if (!isValidNetworkName(network)) return alert('Invalid network');
 
+		const contractPrivkey = generateSecretKey();
+		const contractPubkey = getPublicKey(contractPrivkey);
+		const contractEncryptDm = nostrEncryptDmFactory(Buffer.from(contractPrivkey).toString('hex'));
+
 		const contractRequestPayload = {
 			arbitratorPubkeys: arbitrators.map((pub) => pub.slice(-64)),
 			arbitratorsQuorum,
@@ -41,27 +45,28 @@
 			network
 		} satisfies ContractRequestPayload;
 
-		let contractEventId: string = "";
+		const contractRequestEncryptedText = await contractEncryptDm.encryptDM(contractPubkey, JSON.stringify(contractRequestPayload));
 
-		for (const pubkey of pubkeys) {
-			const contractRequestEncryptedText = await nostrAuth.encryptDM(pubkey, JSON.stringify(contractRequestPayload));
+		const contractPrivkeySecretsTable = await Promise.all(pubkeys.map(async (pubkey) => {
+			const encryptedSecret = await nostrAuth.encryptDM(pubkey, Buffer.from(contractPrivkey).toString('hex'));
 
-			const contractRequestEvent = await nostrAuth.makeEvent(ContractRequestEvent, contractRequestEncryptedText, [['p', pubkey]]);
+			return ['secret', pubkey, encryptedSecret];
+		}))
 
-			if ($nostrAuth?.pubkey === pubkey)
-				contractEventId = contractRequestEvent.id;
+		const pubkeysTable = pubkeys.map((pubkey) => ['p', pubkey]);
 
-			const contractUrl = `${document.location.origin}/contract/join?eventId=${contractRequestEvent.id}`;
+		const contractRequestEvent = await nostrAuth.makeEvent(
+			ContractRequestEvent,
+			contractRequestEncryptedText,
+			[
+				...pubkeysTable,
+				...contractPrivkeySecretsTable,
+			],
+		);
 
-			const notifyOnDmText = `Hey, I created a PLS contract and want you to verify it. You can access it on this link: ${contractUrl}`;
+		const contractEventId = contractRequestEvent.id;
 
-			const notifyOnDmEncryptedText = await nostrAuth.encryptDM(pubkey, notifyOnDmText);
-
-			const notifyOnDmEvent = await nostrAuth.makeEvent(SendEncryptedDM, notifyOnDmEncryptedText, [['p', pubkey]]);
-
-			broadcastToNostr(contractRequestEvent);
-			broadcastToNostr(notifyOnDmEvent);
-		}
+		broadcastToNostr(contractRequestEvent);
 
 		goto('/contract/join?eventId=' + contractEventId);
 	}
