@@ -299,7 +299,7 @@
 				<Button
 					on:click={handleCopyContractLink}
 				>
-					📋 Copy
+					📋 Copy link
 				</Button>
 			{/if}
 
