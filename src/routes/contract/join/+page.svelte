@@ -161,6 +161,7 @@
 			fileHash
 		} satisfies ContractApprovalPayload);
 
+		// it ensures that we can retrieve these approval events easily
 		const eventIdTags = eventId ? [['d', eventId]] : [];
 
 		for (const pubkey of pubkeys) {
