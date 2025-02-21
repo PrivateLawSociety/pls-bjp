@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { broadcastToNostr, nostrAuth, relayList, relayPool } from '$lib/nostr';
+	import { broadcastToNostr, nostrAuth, nostrEncryptDmFactory, relayList, relayPool } from '$lib/nostr';
 	import { onMount } from 'svelte';
 	import {
 		ContractRequestEvent,
@@ -19,6 +19,7 @@
 	import { createLiquidMultisig } from 'pls-liquid';
 	import DropDocument from '$lib/components/DropDocument.svelte';
 	import { page } from '$app/stores';
+	import { getPublicKey } from 'nostr-tools';
 
 	let contractsData: Record<string, UnsignedContract> = {};
 
@@ -27,6 +28,8 @@
 	let documentFile: File | undefined;
 	let documentHash: string | undefined;
 	let documentFileName: string | undefined;
+
+	$: eventId = $page.url.searchParams.get('eventId');
 
 	$: if (documentFile)
 		hashFromFile(documentFile).then((hash) => {
@@ -37,8 +40,6 @@
 	onMount(async () => {
 		if (await nostrAuth.tryLogin()) {
 			if (!$nostrAuth?.pubkey) return;
-
-			const eventId = $page.url.searchParams.get('eventId');
 
 			const eventIds = eventId ? [eventId] : undefined;
 
@@ -53,8 +54,22 @@
 				],
 				{
 					async onevent(e) {
+						const encryptedContractPrivkeyTag = e.tags
+							.filter((tag) => tag[0] === 'secret')
+							.find((tag) => tag[1] === $nostrAuth.pubkey) || [];
+
+						const encryptedContractPrivkey = encryptedContractPrivkeyTag[2];
+
+						if (encryptedContractPrivkey === undefined)
+							throw new Error("Pubkey not found in allowed pubkeys list");
+
+						const contractPrivkey = await nostrAuth.decryptDM(e.pubkey, encryptedContractPrivkey);
+						const contractPubkey = getPublicKey(Uint8Array.from(Buffer.from(contractPrivkey, 'hex')));
+
+						const contractEncryptDm = nostrEncryptDmFactory(contractPrivkey);
+
 						const data = JSON.parse(
-							await nostrAuth.decryptDM(e.pubkey, e.content)
+							await contractEncryptDm.decryptDM(contractPubkey, e.content),
 						) as ContractRequestPayload;
 
 						contractsData[data.fileHash] = {
@@ -118,6 +133,11 @@
 			);
 		}
 	});
+
+	function handleCopyContractLink() {
+		navigator.clipboard.writeText(document.location.href);
+		alert('Link copied to clipboard');
+	}
 
 	async function handleApprove(fileHash: string) {
 		if (!$nostrAuth?.pubkey) return;
@@ -268,6 +288,16 @@
 			{:else if documentHash !== undefined}
 				<p>Contract text doesn't match!</p>
 			{/if}
+
+			{#if eventId}
+				<p class="text-center">Send this contract link to another parties</p>
+				<Button
+					on:click={handleCopyContractLink}
+				>
+					📋 Copy
+				</Button>
+			{/if}
+
 
 			{#key contractSignatures}
 				{#if hasAllSignatures(data.document.fileHash)}
