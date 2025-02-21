@@ -116,7 +116,8 @@
 				[
 					{
 						kinds: [ContractApprovalEvent],
-						'#p': [$nostrAuth.pubkey]
+						'#p': [$nostrAuth.pubkey],
+						'#d': eventIds,
 					}
 				],
 				{
@@ -160,11 +161,14 @@
 			fileHash
 		} satisfies ContractApprovalPayload);
 
+		const eventIdTags = eventId ? [['d', eventId]] : [];
+
 		for (const pubkey of pubkeys) {
 			const encryptedText = await nostrAuth.encryptDM(pubkey, payload);
 
 			const event = await nostrAuth.makeEvent(ContractApprovalEvent, encryptedText, [
-				['p', pubkey]
+				['p', pubkey],
+				...eventIdTags,
 			]);
 
 			broadcastToNostr(event);
