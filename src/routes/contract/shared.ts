@@ -22,5 +22,3 @@ export const ContractRequestEvent = 1970;
 
 // events with values between 30000 and 39999 are addresssable and can be retrieved any time
 export const ContractApprovalEvent = 36971;
-// event to send encrypted DM
-export const SendEncryptedDM = 4;
