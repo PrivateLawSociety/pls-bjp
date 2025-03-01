@@ -189,10 +189,10 @@
 		for (const pubkey of pubkeys) {
 			const encryptedText = await nostrAuth.encryptDM(pubkey, payload);
 
-			const pubkeyHash = tweakContractPubkey(documentHash, pubkey, { disableParityByte: true });
+			const tweakedPubkey = tweakContractPubkey(documentHash, pubkey);
 
 			const event = await nostrAuth.makeEvent(ContractApprovalEvent, encryptedText, [
-				['h', pubkeyHash],
+				['h', tweakedPubkey],
 				['d', eventId],
 			]);
 
