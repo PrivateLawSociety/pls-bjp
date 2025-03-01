@@ -4,7 +4,7 @@
 	import { getContext } from 'svelte';
 	import type { Writable } from 'svelte/store';
 	import type { NewContractData } from '../shared';
-	import { broadcastToNostr, nostrAuth, nostrEncryptDmFactory } from '$lib/nostr';
+	import { broadcastToNostr, makeNostrEvent, nostrEncryptDmFactory } from '$lib/nostr';
 	import { goto } from '$app/navigation';
 	import {
 		ContractRequestEvent,
@@ -12,6 +12,7 @@
 	} from '../../shared';
 	import { isValidNetworkName } from '$lib/bitcoin';
 	import { generateSecretKey, getPublicKey } from 'nostr-tools';
+	import { tweakContractPubkey } from '$lib/pls/contract'
 
 	let newContract = getContext<Writable<NewContractData>>('contract');
 
@@ -34,8 +35,9 @@
 		if (!isValidNetworkName(network)) return alert('Invalid network');
 
 		const contractPrivkey = generateSecretKey();
+		const contractPrivkeyStr = Buffer.from(contractPrivkey).toString('hex');
 		const contractPubkey = getPublicKey(contractPrivkey);
-		const contractEncryptDm = nostrEncryptDmFactory(Buffer.from(contractPrivkey).toString('hex'));
+		const contractEncryptDm = nostrEncryptDmFactory(contractPrivkeyStr);
 
 		const contractRequestPayload = {
 			arbitratorPubkeys: arbitrators.map((pub) => pub.slice(-64)),
@@ -48,18 +50,21 @@
 		const contractRequestEncryptedText = await contractEncryptDm.encryptDM(contractPubkey, JSON.stringify(contractRequestPayload));
 
 		const contractPrivkeySecretsTable = await Promise.all(pubkeys.map(async (pubkey) => {
-			const encryptedSecret = await nostrAuth.encryptDM(pubkey, Buffer.from(contractPrivkey).toString('hex'));
+			const encryptedSecret = await contractEncryptDm.encryptDM(pubkey, Buffer.from(contractPrivkey).toString('hex'));
 
-			return ['secret', pubkey, encryptedSecret];
+			const tweakedPubkey = tweakContractPubkey(documentHash, pubkey);
+
+			return ['secret', tweakedPubkey, encryptedSecret];
 		}))
 
-		const pubkeysTable = pubkeys.map((pubkey) => ['p', pubkey]);
+		const pubkeysHashTable = pubkeys.map((pubkey) => ['h', tweakContractPubkey(documentHash, pubkey)]);
 
-		const contractRequestEvent = await nostrAuth.makeEvent(
+		const contractRequestEvent = await makeNostrEvent(
+			contractPrivkeyStr,
 			ContractRequestEvent,
 			contractRequestEncryptedText,
 			[
-				...pubkeysTable,
+				...pubkeysHashTable,
 				...contractPrivkeySecretsTable,
 			],
 		);
