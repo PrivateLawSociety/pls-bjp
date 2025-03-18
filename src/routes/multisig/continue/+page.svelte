@@ -43,7 +43,7 @@
 
 	$: if (contractData) onContractSelected();
 
-	$: userShownData = getUserShownData();
+	$: userShownData = getUserShownData(psbtsMetadata, contractData);
 
 	$: if ($contractDataFileStore) onContractDataFileSelected($contractDataFileStore);
 
@@ -51,7 +51,7 @@
 		contractData = tryParseFinishedContract(await file.text());
 	}
 
-	function getUserShownData() {
+	function getUserShownData(psbtsMetadata: PsbtMetadata[] | null, contractData: Contract | null) {
 		if (!psbtsMetadata || !contractData) return null;
 
 		// TODO: checck if this works
