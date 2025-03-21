@@ -16,12 +16,8 @@
 				<Button class="w-48 md:w-64">Create</Button>
 			</a>
 
-			<a href="/contract/join" class="w-full md:w-auto">
-				<Button class="w-48 md:w-64">Sign</Button>
-			</a>
-
 			<a href="/contract/verify" class="w-full md:w-auto">
-				<Button class="w-48 md:w-64">Verify</Button>
+				<Button class="w-48 md:w-64">View</Button>
 			</a>
 
 			<!-- <a href="/settings" class="w-full md:w-auto">
