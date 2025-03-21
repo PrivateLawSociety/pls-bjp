@@ -62,7 +62,6 @@ export function getOldestEvent(events: Event[]) {
 export function nostrEncryptDmFactory(privkey: string | undefined) {
 	return {
 		async encryptDM(otherPubkey: string, text: string) {
-
 			if (privkey) {
 				return await nip04.encrypt(privkey, otherPubkey, text);
 			} else {
@@ -75,8 +74,8 @@ export function nostrEncryptDmFactory(privkey: string | undefined) {
 			} else {
 				return await window.nostr!.nip04.decrypt(otherPubkey, text);
 			}
-		},
-	}
+		}
+	};
 }
 
 export let nostrAuth = (() => {

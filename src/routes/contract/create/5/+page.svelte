@@ -6,13 +6,10 @@
 	import type { NewContractData } from '../shared';
 	import { broadcastToNostr, makeNostrEvent, nostrEncryptDmFactory } from '$lib/nostr';
 	import { goto } from '$app/navigation';
-	import {
-		ContractRequestEvent,
-		type ContractRequestPayload,
-	} from '../../shared';
+	import { ContractRequestEvent, type ContractRequestPayload } from '../../shared';
 	import { isValidNetworkName } from '$lib/bitcoin';
 	import { generateSecretKey, getPublicKey } from 'nostr-tools';
-	import { tweakContractPubkey } from '$lib/pls/contract'
+	import { tweakContractPubkey } from '$lib/pls/contract';
 
 	let newContract = getContext<Writable<NewContractData>>('contract');
 
@@ -47,26 +44,34 @@
 			network
 		} satisfies ContractRequestPayload;
 
-		const contractRequestEncryptedText = await contractEncryptDm.encryptDM(contractPubkey, JSON.stringify(contractRequestPayload));
+		const contractRequestEncryptedText = await contractEncryptDm.encryptDM(
+			contractPubkey,
+			JSON.stringify(contractRequestPayload)
+		);
 
-		const contractPrivkeySecretsTable = await Promise.all(pubkeys.map(async (pubkey) => {
-			const encryptedSecret = await contractEncryptDm.encryptDM(pubkey, Buffer.from(contractPrivkey).toString('hex'));
+		const contractPrivkeySecretsTable = await Promise.all(
+			pubkeys.map(async (pubkey) => {
+				const encryptedSecret = await contractEncryptDm.encryptDM(
+					pubkey,
+					Buffer.from(contractPrivkey).toString('hex')
+				);
 
-			const tweakedPubkey = tweakContractPubkey(documentHash, pubkey);
+				const tweakedPubkey = tweakContractPubkey(documentHash, pubkey);
 
-			return ['secret', tweakedPubkey, encryptedSecret];
-		}))
+				return ['secret', tweakedPubkey, encryptedSecret];
+			})
+		);
 
-		const pubkeysHashTable = pubkeys.map((pubkey) => ['h', tweakContractPubkey(documentHash, pubkey)]);
+		const pubkeysHashTable = pubkeys.map((pubkey) => [
+			'h',
+			tweakContractPubkey(documentHash, pubkey)
+		]);
 
 		const contractRequestEvent = await makeNostrEvent(
 			contractPrivkeyStr,
 			ContractRequestEvent,
 			contractRequestEncryptedText,
-			[
-				...pubkeysHashTable,
-				...contractPrivkeySecretsTable,
-			],
+			[...pubkeysHashTable, ...contractPrivkeySecretsTable]
 		);
 
 		const contractEventId = contractRequestEvent.id;

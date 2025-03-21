@@ -15,15 +15,11 @@ export function tweakPublicKey(pubkey: Buffer, tweak: Buffer) {
 
 	const tweakedPubkey = ecc.xOnlyPointAddTweak(xOnlyPubkey, tweak);
 
-	if (!tweakedPubkey)
-		throw new Error('Cannot tweak public key');
+	if (!tweakedPubkey) throw new Error('Cannot tweak public key');
 
-	const parityByte = Buffer.from([tweakedPubkey.parity ? 0x02: 0x03]);
+	const parityByte = Buffer.from([tweakedPubkey.parity ? 0x02 : 0x03]);
 
-	return Buffer.concat([
-		parityByte,
-		Buffer.from(tweakedPubkey.xOnlyPubkey),
-	]);
+	return Buffer.concat([parityByte, Buffer.from(tweakedPubkey.xOnlyPubkey)]);
 }
 
 export const networkNames = ['bitcoin', 'bitcoin_testnet', 'liquid', 'liquid_testnet'] as const;

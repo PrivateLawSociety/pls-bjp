@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { broadcastToNostr, nostrAuth, nostrEncryptDmFactory, relayList, relayPool } from '$lib/nostr';
+	import {
+		broadcastToNostr,
+		nostrAuth,
+		nostrEncryptDmFactory,
+		relayList,
+		relayPool
+	} from '$lib/nostr';
 	import { onDestroy, onMount } from 'svelte';
 	import {
 		ContractRequestEvent,
@@ -41,15 +47,15 @@
 	$: if (documentHash)
 		tryConnectToRelays().then((listeners) => {
 			relayListeners = listeners;
-		})
+		});
 
 	onMount(async () => {
 		relayListeners = await tryConnectToRelays();
 	});
 
 	onDestroy(() => {
-		relayListeners?.forEach(listener => listener.close());
-	})
+		relayListeners?.forEach((listener) => listener.close());
+	});
 
 	async function tryConnectToRelays() {
 		if (!eventId) return;
@@ -69,26 +75,26 @@
 					{
 						kinds: [ContractRequestEvent],
 						ids: eventIds,
-						'#h': [tweakedPubkey],
+						'#h': [tweakedPubkey]
 					}
 				],
 				{
 					async onevent(e) {
-						const encryptedContractPrivkeyTag = e.tags
-							.filter((tag) => tag[0] === 'secret')
-							.find((tag) => tag[1] === tweakedPubkey) || [];
+						const encryptedContractPrivkeyTag =
+							e.tags.filter((tag) => tag[0] === 'secret').find((tag) => tag[1] === tweakedPubkey) ||
+							[];
 
 						const encryptedContractPrivkey = encryptedContractPrivkeyTag[2];
 
 						if (encryptedContractPrivkey === undefined)
-							throw new Error("Pubkey not found in allowed pubkeys list");
+							throw new Error('Pubkey not found in allowed pubkeys list');
 
 						const contractPrivkey = await nostrAuth.decryptDM(e.pubkey, encryptedContractPrivkey);
 
 						const contractEncryptDm = nostrEncryptDmFactory(contractPrivkey);
 
 						const data = JSON.parse(
-							await contractEncryptDm.decryptDM(e.pubkey, e.content),
+							await contractEncryptDm.decryptDM(e.pubkey, e.content)
 						) as ContractRequestPayload;
 
 						contractsData[data.fileHash] = {
@@ -136,7 +142,7 @@
 					{
 						kinds: [ContractApprovalEvent],
 						'#h': [tweakedPubkey],
-						'#d': eventIds,
+						'#d': eventIds
 					}
 				],
 				{
@@ -193,7 +199,7 @@
 
 			const event = await nostrAuth.makeEvent(ContractApprovalEvent, encryptedText, [
 				['h', tweakedPubkey],
-				['d', eventId],
+				['d', eventId]
 			]);
 
 			broadcastToNostr(event);
@@ -317,12 +323,8 @@
 			{/if}
 
 			{#if eventId}
-				<p class="text-center">Send this contract link to another parties</p>
-				<Button
-					on:click={handleCopyContractLink}
-				>
-					📋 Copy link
-				</Button>
+				<p class="text-center">Send this contract link to the involved parties:</p>
+				<Button on:click={handleCopyContractLink}>📋 Copy link</Button>
 			{/if}
 
 			{#key contractSignatures}
