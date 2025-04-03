@@ -38,7 +38,7 @@
 	"dependencies": {
 		"@popperjs/core": "^2.11.8",
 		"@vulpemventures/secp256k1-zkp": "3.1.0",
-		"bitcoinjs-lib": "^6.1.4",
+		"bitcoinjs-lib": "^6.1.5",
 		"buffer": "^6.0.3",
 		"ecpair": "^2.1.0",
 		"flowbite": "^2.3.0",
