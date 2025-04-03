@@ -2,7 +2,7 @@
 	import { createBitcoinMultisig, startTxSpendingFromMultisig } from 'pls-bitcoin';
 	import Button from '$lib/components/Button.svelte';
 	import LabelledInput from '$lib/components/LabelledInput.svelte';
-	import { tryParseFinishedContract } from '$lib/pls/contract';
+	import { tryParseFinishedContract, isLiquidNetworkContract } from '$lib/pls/contract';
 	import type { Contract } from 'pls-full';
 	import { SpendRequestEvent, type PsbtMetadata, type SpendRequestPayload } from '../shared';
 	import { broadcastToNostr, nostrAuth } from '$lib/nostr';
@@ -78,22 +78,25 @@
 
 		utxos = await mempool.getAddressUtxos(contractData.collateral.multisigAddress);
 
-		if (getNetworkByName(contractData.collateral.network).isLiquid && utxos) {
+		if (isLiquidNetworkContract(contractData) && utxos) {
 			const txHexes = await Promise.all(
 				utxos.map((utxo) => mempool.getTransactionHexFromId(utxo.txid))
 			);
+
+			const blindingKeypair = ECPair.fromPrivateKey(Buffer.from(contractData.collateral.privateBlindingKey, 'hex'));
 
 			utxos = utxos.reduce((acc, utxo, i) => {
 				const hex = txHexes[i];
 
 				if (hex) {
-					const value = getUnblindedUtxoValue(
-						{
+					const value = getUnblindedUtxoValue({
+						utxo: {
 							...utxo,
-							hex: hex!
+							hex: hex!,
 						},
-						i
-					);
+						blindingKeypair: blindingKeypair,
+						index: i,
+					});
 
 					if (value)
 						acc.push({
@@ -144,13 +147,19 @@
 
 		const { network, isLiquid } = getNetworkByName(contractData.collateral.network);
 
-		if (isLiquid) {
-			const { hashTree, multisigScripts } = createLiquidMultisig(
-				contractData.collateral.pubkeys.clients,
-				contractData.collateral.pubkeys.arbitrators,
-				contractData.collateral.arbitratorsQuorum,
-				network
-			);
+		const tweak = Buffer.from(contractData.document.fileHash, 'hex');
+
+		if (isLiquidNetworkContract(contractData) && isLiquid) {
+			const blindingKeypair = ECPair.fromPrivateKey(Buffer.from(contractData.collateral.privateBlindingKey, 'hex'));
+
+			const { hashTree, multisigScripts } = createLiquidMultisig({
+				parts: contractData.collateral.pubkeys.clients,
+				arbitrators: contractData.collateral.pubkeys.arbitrators,
+				arbitratorsQuorum: contractData.collateral.arbitratorsQuorum,
+				network: network,
+				blindingKeypair,
+				tweak,
+			});
 
 			// const unixNow = Math.floor(Date.now() / 1000);
 			// const oneDayInSeconds = 60 * 60 * 24;
@@ -164,18 +173,19 @@
 			for (const script of possibleScripts) {
 				const redeemOutput = script.leaf.output.toString('hex');
 
-				const psbt = await startSpendFromLiquidMultisig(
+				const psbt = await startSpendFromLiquidMultisig({
 					hashTree,
 					redeemOutput,
-					utxos.map((utxo) => ({
+					utxos: utxos.map((utxo) => ({
 						...utxo,
-						hex: utxo.hex!
+						hex: utxo.hex!,
 					})),
 					network,
 					signer,
-					addresses.filter(({ address }) => address.trim() !== '')
-					// timelockDays ? unixNow + oneDayInSeconds * timelockDays : undefined
-				);
+					receivingAddresses: addresses.filter(({ address}) => address.trim() !== ''),
+					blindingKeypair,
+					tweak,
+				});
 				if (!psbt) return alert("couldn't generate PSETs");
 
 				generatedPSBTsMetadata = [
@@ -188,16 +198,17 @@
 				];
 			}
 		} else {
-			const { multisig, multisigScripts } = createBitcoinMultisig(
-				contractData.collateral.pubkeys.clients.map((pubkey) =>
+			const { multisig, multisigScripts } = createBitcoinMultisig({
+				publicPartsECPairs: contractData.collateral.pubkeys.clients.map((pubkey) =>
 					ECPair.fromPublicKey(Buffer.from('02' + pubkey, 'hex'), { network: network })
 				),
-				contractData.collateral.pubkeys.arbitrators.map((pubkey) =>
+				publicArbitratorsECPairs: contractData.collateral.pubkeys.arbitrators.map((pubkey) =>
 					ECPair.fromPublicKey(Buffer.from('02' + pubkey, 'hex'), { network: network })
 				),
-				contractData.collateral.arbitratorsQuorum,
-				network
-			);
+				arbitratorsQuorum: contractData.collateral.arbitratorsQuorum,
+				network,
+				tweak,
+			});
 
 			const possibleScripts = multisigScripts.filter(({ combination }) =>
 				combination.some((ecpair) => ecpair.publicKey.toString('hex') === '02' + pubkey)
@@ -211,15 +222,16 @@
 				const unixNow = Math.floor(Date.now() / 1000);
 				const oneDayInSeconds = 60 * 60 * 24;
 
-				const psbt = await startTxSpendingFromMultisig(
+				const psbt = await startTxSpendingFromMultisig({
 					multisig,
 					redeemOutput,
 					signer,
 					network,
-					addresses.filter(({ address }) => address.trim() !== ''),
+					receivingAddresses: addresses.filter(({ address }) => address.trim() !== ''),
 					utxos,
-					timelockDays ? unixNow + oneDayInSeconds * timelockDays : undefined
-				);
+					tweak,
+					locktime: timelockDays ? unixNow + oneDayInSeconds * timelockDays : undefined,
+				});
 
 				generatedPSBTsMetadata = [
 					...generatedPSBTsMetadata,

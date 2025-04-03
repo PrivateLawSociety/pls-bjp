@@ -14,12 +14,13 @@
 		createLiquidMultisig,
 		finalizeTxSpendingFromLiquidMultisig,
 		getTapscriptSigsOrdered,
-		signTaprootTransaction
+		signLiquidTaprootTransaction,
 	} from 'pls-liquid';
 	import type { Contract } from 'pls-full';
 	import DropDocument from '$lib/components/DropDocument.svelte';
-	import { tryParseFinishedContract } from '$lib/pls/contract';
-	import { getNetworkByName } from '$lib/bitcoin';
+	import { isLiquidNetworkContract, tryParseFinishedContract } from '$lib/pls/contract';
+	import { ECPair, getNetworkByName } from '$lib/bitcoin';
+	import { signBitcoinTaprootTransaction } from 'pls-bitcoin';
 
 	let psbtsMetadataStringified = '';
 
@@ -176,13 +177,19 @@
 
 		if (!signer) return;
 
-		if (isLiquid) {
-			const { multisigScripts } = createLiquidMultisig(
-				contractData.collateral.pubkeys.clients,
-				contractData.collateral.pubkeys.arbitrators,
-				contractData.collateral.arbitratorsQuorum,
-				network
-			);
+		const tweak = Buffer.from(contractData.document.fileHash, 'hex');
+
+		if (isLiquidNetworkContract(contractData) && isLiquid) {
+			const blindingKeypair = ECPair.fromPrivateKey(Buffer.from(contractData.collateral.privateBlindingKey, 'hex'));
+
+			const { multisigScripts } = createLiquidMultisig({
+				parts: contractData.collateral.pubkeys.clients,
+				arbitrators: contractData.collateral.pubkeys.arbitrators,
+				arbitratorsQuorum: contractData.collateral.arbitratorsQuorum,
+				network,
+				blindingKeypair,
+				tweak,
+			});
 
 			generatedPSBTsMetadata = await Promise.all(
 				psbtsMetadata
@@ -204,7 +211,13 @@
 							scriptHex: redeemOutput
 						});
 
-						await signTaprootTransaction(pset, signer, leafHash, network);
+						await signLiquidTaprootTransaction({
+							pset,
+							keypair: signer,
+							leafHash,
+							network,
+							tweak,
+						});
 
 						return {
 							...metadata,
@@ -216,11 +229,12 @@
 			if (generatedPSBTsMetadata.length === 1) {
 				const pset = Pset.fromBuffer(Buffer.from(generatedPSBTsMetadata[0].psbtHex, 'hex'));
 
-				const { clientSigs, arbitratorSigs } = getTapscriptSigsOrdered(
+				const { clientSigs, arbitratorSigs } = getTapscriptSigsOrdered({
 					pset,
-					contractData.collateral.pubkeys.clients,
-					contractData.collateral.pubkeys.arbitrators
-				);
+					clientPubkeys: contractData.collateral.pubkeys.clients,
+					arbitratorPubkeys: contractData.collateral.pubkeys.arbitrators,
+					tweak,
+				});
 
 				const clientSigAmount = clientSigs.reduce((acc, sig) => (sig ? acc + 1 : acc), 0);
 				const arbitratorSigAmount = arbitratorSigs.reduce((acc, sig) => (sig ? acc + 1 : acc), 0);
@@ -229,7 +243,11 @@
 					clientSigAmount == 2 ||
 					(clientSigAmount == 1 && arbitratorSigAmount >= contractData.collateral.arbitratorsQuorum)
 				) {
-					const tx = finalizeTxSpendingFromLiquidMultisig(pset, clientSigs, arbitratorSigs);
+					const tx = finalizeTxSpendingFromLiquidMultisig({
+						pset,
+						clientSigs,
+						arbitratorSigs,
+					});
 
 					generatedTransactionHex = tx.toHex();
 				}
@@ -241,7 +259,11 @@
 					.map(async (metadata) => {
 						const psbt = Psbt.fromHex(metadata.psbtHex, { network: network });
 
-						await psbt.signAllInputsAsync(signer);
+						await signBitcoinTaprootTransaction({
+							psbt,
+							signer,
+							tweak,
+						})
 
 						return {
 							...metadata,

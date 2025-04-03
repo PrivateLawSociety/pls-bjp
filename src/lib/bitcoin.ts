@@ -22,7 +22,15 @@ export function tweakPublicKey(pubkey: Buffer, tweak: Buffer) {
 	return Buffer.concat([parityByte, Buffer.from(tweakedPubkey.xOnlyPubkey)]);
 }
 
-export const networkNames = ['bitcoin', 'bitcoin_testnet', 'liquid', 'liquid_testnet'] as const;
+export const bitcoinNetworkNames = ['bitcoin', 'bitcoin_testnet'] as const;
+
+export type BitcoinNetworkNames = (typeof bitcoinNetworkNames)[number];
+
+export const liquidNetworkNames = ['liquid', 'liquid_testnet'] as const;
+
+export type LiquidNetworkNames = (typeof liquidNetworkNames)[number];
+
+export const networkNames = [...bitcoinNetworkNames, ...liquidNetworkNames] as const;
 
 export type NetworkNames = (typeof networkNames)[number];
 
@@ -30,16 +38,24 @@ export function isValidNetworkName(name: string): name is NetworkNames {
 	return networkNames.includes(name as NetworkNames);
 }
 
-export function getNetworkByName(networkName: NetworkNames): { isTestnet: boolean } & (
+export function isLiquidNetworkName(networkName: NetworkNames): networkName is "liquid" | "liquid_testnet" {
+	return liquidNetworkNames.includes(networkName as LiquidNetworkNames);
+}
+
+export function isBitcoinNetworkName(networkName: NetworkNames): networkName is BitcoinNetworkNames {
+	return bitcoinNetworkNames.includes(networkName as BitcoinNetworkNames);
+}
+
+export function getNetworkByName<T>(networkName: NetworkNames): { isTestnet: boolean } & (
 	| {
 			isLiquid: false;
 			network: bitcoin.networks.Network;
-			name: 'bitcoin' | 'bitcoin_testnet';
+			name: BitcoinNetworkNames;
 	  }
 	| {
 			isLiquid: true;
 			network: liquid.networks.Network;
-			name: 'liquid' | 'liquid_testnet';
+			name: LiquidNetworkNames;
 	  }
 ) {
 	if (networkName === 'bitcoin')

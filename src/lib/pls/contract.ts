@@ -1,4 +1,4 @@
-import { tweakPublicKey } from '$lib/bitcoin';
+import { tweakPublicKey, type LiquidNetworkNames, isLiquidNetworkName, type BitcoinNetworkNames, isBitcoinNetworkName } from '$lib/bitcoin';
 import type { ECPairInterface } from 'ecpair';
 import { hashFromJSON } from 'pls-core';
 
@@ -57,4 +57,24 @@ export function tweakContractPubkey(fileHash: string, pubkey: string) {
 	const tweakedPubkey = tweakPublicKey(pubkeyBuffer, tweak);
 
 	return tweakedPubkey.toString('hex');
+}
+
+type BitcoinNetworkContract = Omit<Contract, "collateral"> & {
+	collateral: Extract<Contract['collateral'], {
+		network: BitcoinNetworkNames
+	}>
+}
+
+export function isBitcoinNetworkContract(contract: Contract): contract is BitcoinNetworkContract {
+	return isBitcoinNetworkName(contract.collateral.network);
+}
+
+type LiquidNetworkContract = Omit<Contract, "collateral"> & {
+	collateral: Extract<Contract['collateral'], {
+		network: LiquidNetworkNames
+	}>
+}
+
+export function isLiquidNetworkContract(contract: Contract): contract is LiquidNetworkContract {
+	return isLiquidNetworkName(contract.collateral.network);
 }

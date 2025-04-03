@@ -26,6 +26,7 @@
 	import DropDocument from '$lib/components/DropDocument.svelte';
 	import { page } from '$app/stores';
 	import type { SubCloser } from 'nostr-tools/lib/types/pool';
+	import { ECPairInterface } from 'ecpair';
 
 	let contractsData: Record<string, UnsignedContract> = {};
 
@@ -97,6 +98,10 @@
 							await contractEncryptDm.decryptDM(e.pubkey, e.content)
 						) as ContractRequestPayload;
 
+						const blindingKeypair = ECPair.fromPrivateKey(Buffer.from(contractPrivkey, 'hex'));
+
+						const tweak = Buffer.from(data.fileHash);
+
 						contractsData[data.fileHash] = {
 							collateral: {
 								arbitratorsQuorum: data.arbitratorsQuorum,
@@ -104,12 +109,12 @@
 									arbitrators: data.arbitratorPubkeys,
 									arbitratorsQuorum: data.arbitratorsQuorum,
 									clients: data.clientPubkeys,
-									network: data.network
+									network: data.network,
+									blindingKeypair,
+									tweak
 								}),
 								network: data.network,
-								// TODO TODO TODO
-								privateBlindingKey:
-									'0000000000000000000000000000000000000000000000000000000000000001',
+								privateBlindingKey: contractPrivkey,
 								pubkeys: {
 									clients: data.clientPubkeys,
 									arbitrators: data.arbitratorPubkeys
@@ -229,31 +234,55 @@
 		].every((pubkey) => Object.keys(contractSignatures[fileHash]).includes(pubkey));
 	}
 
-	function getMultisigAddress({
-		arbitratorsQuorum,
-		arbitrators,
-		clients,
-		network: networkName
-	}: {
+	type GetMultisigAddressArgs = {
 		arbitratorsQuorum: number;
 		arbitrators: string[];
 		clients: string[];
 		network: NetworkNames;
-	}) {
+		blindingKeypair: ECPairInterface;
+		tweak: Buffer;
+	};
+
+	function getMultisigAddress({
+		arbitratorsQuorum,
+		arbitrators,
+		clients,
+		network: networkName,
+		blindingKeypair,
+		tweak
+	}: GetMultisigAddressArgs) {
 		const { isLiquid, network } = getNetworkByName(networkName);
 
-		return isLiquid
-			? createLiquidMultisig(clients, arbitrators, arbitratorsQuorum, network).confidentialAddress
-			: createBitcoinMultisig(
-					clients.map((pubkey) =>
-						ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
-					),
-					arbitrators.map((pubkey) =>
-						ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
-					),
-					arbitratorsQuorum,
-					network
-			  ).multisig.address!;
+		if (isLiquid) {
+			const multisig = createLiquidMultisig({
+				parts: clients,
+				arbitrators,
+				arbitratorsQuorum,
+				network,
+				blindingKeypair,
+				tweak
+			});
+
+			return multisig.confidentialAddress!;
+		}
+
+		const publicPartsECPairs = clients.map((pubkey) =>
+			ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
+		);
+
+		const publicArbitratorsECPairs = arbitrators.map((pubkey) =>
+			ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
+		);
+
+		const multisig = createBitcoinMultisig({
+			publicPartsECPairs,
+			publicArbitratorsECPairs,
+			arbitratorsQuorum,
+			network,
+			tweak
+		});
+
+		return multisig.multisig.address!;
 	}
 
 	function exportContract(fileHash: string) {
