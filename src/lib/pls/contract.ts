@@ -1,4 +1,4 @@
-import { goto } from '$app/navigation';
+import { tweakPublicKey } from '$lib/bitcoin';
 import type { ECPairInterface } from 'ecpair';
 import { hashFromJSON } from 'pls-core';
 
@@ -48,4 +48,13 @@ export async function signContract(
 
 export function verifyContract(keypair: ECPairInterface, contract: Contract, signature: Buffer) {
 	return keypair.verifySchnorr(hashFromJSON(getMinimalUnsignedContract(contract)), signature);
+}
+
+export function tweakContractPubkey(fileHash: string, pubkey: string) {
+	const pubkeyBuffer = Buffer.from('02' + pubkey, 'hex');
+	const tweak = Buffer.from(fileHash, 'hex');
+
+	const tweakedPubkey = tweakPublicKey(pubkeyBuffer, tweak);
+
+	return tweakedPubkey.toString('hex');
 }

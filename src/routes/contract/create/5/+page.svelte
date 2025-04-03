@@ -4,10 +4,12 @@
 	import { getContext } from 'svelte';
 	import type { Writable } from 'svelte/store';
 	import type { NewContractData } from '../shared';
-	import { broadcastToNostr, nostrAuth } from '$lib/nostr';
+	import { broadcastToNostr, makeNostrEvent, nostrEncryptDmFactory } from '$lib/nostr';
 	import { goto } from '$app/navigation';
 	import { ContractRequestEvent, type ContractRequestPayload } from '../../shared';
 	import { isValidNetworkName } from '$lib/bitcoin';
+	import { generateSecretKey, getPublicKey } from 'nostr-tools';
+	import { tweakContractPubkey } from '$lib/pls/contract';
 
 	let newContract = getContext<Writable<NewContractData>>('contract');
 
@@ -29,7 +31,12 @@
 
 		if (!isValidNetworkName(network)) return alert('Invalid network');
 
-		const payload = {
+		const contractPrivkey = generateSecretKey();
+		const contractPrivkeyStr = Buffer.from(contractPrivkey).toString('hex');
+		const contractPubkey = getPublicKey(contractPrivkey);
+		const contractEncryptDm = nostrEncryptDmFactory(contractPrivkeyStr);
+
+		const contractRequestPayload = {
 			arbitratorPubkeys: arbitrators.map((pub) => pub.slice(-64)),
 			arbitratorsQuorum,
 			clientPubkeys: [clients[0], clients[1]].map((pub) => pub.slice(-64)),
@@ -37,15 +44,41 @@
 			network
 		} satisfies ContractRequestPayload;
 
-		for (const pubkey of pubkeys) {
-			const encryptedText = await nostrAuth.encryptDM(pubkey, JSON.stringify(payload));
+		const contractRequestEncryptedText = await contractEncryptDm.encryptDM(
+			contractPubkey,
+			JSON.stringify(contractRequestPayload)
+		);
 
-			const event = await nostrAuth.makeEvent(ContractRequestEvent, encryptedText, [['p', pubkey]]);
+		const contractPrivkeySecretsTable = await Promise.all(
+			pubkeys.map(async (pubkey) => {
+				const encryptedSecret = await contractEncryptDm.encryptDM(
+					pubkey,
+					Buffer.from(contractPrivkey).toString('hex')
+				);
 
-			broadcastToNostr(event);
-		}
+				const tweakedPubkey = tweakContractPubkey(documentHash, pubkey);
 
-		goto('/contract/join');
+				return ['secret', tweakedPubkey, encryptedSecret];
+			})
+		);
+
+		const pubkeysHashTable = pubkeys.map((pubkey) => [
+			'h',
+			tweakContractPubkey(documentHash, pubkey)
+		]);
+
+		const contractRequestEvent = await makeNostrEvent(
+			contractPrivkeyStr,
+			ContractRequestEvent,
+			contractRequestEncryptedText,
+			[...pubkeysHashTable, ...contractPrivkeySecretsTable]
+		);
+
+		const contractEventId = contractRequestEvent.id;
+
+		broadcastToNostr(contractRequestEvent);
+
+		goto('/contract/join?eventId=' + contractEventId);
 	}
 </script>
 

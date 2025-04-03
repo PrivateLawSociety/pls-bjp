@@ -1,6 +1,12 @@
 <script lang="ts">
-	import { broadcastToNostr, nostrAuth, relayList, relayPool } from '$lib/nostr';
-	import { onMount } from 'svelte';
+	import {
+		broadcastToNostr,
+		nostrAuth,
+		nostrEncryptDmFactory,
+		relayList,
+		relayPool
+	} from '$lib/nostr';
+	import { onDestroy, onMount } from 'svelte';
 	import {
 		ContractRequestEvent,
 		ContractApprovalEvent,
@@ -10,7 +16,7 @@
 
 	import { contractSchema, type UnsignedContract } from 'pls-full';
 
-	import { signContract } from '$lib/pls/contract';
+	import { tweakContractPubkey, signContract } from '$lib/pls/contract';
 	import Button from '$lib/components/Button.svelte';
 	import Person from '$lib/components/Person.svelte';
 	import { downloadBlob, hashFromFile } from '$lib/utils';
@@ -18,6 +24,8 @@
 	import { ECPair, getNetworkByName, type NetworkNames } from '$lib/bitcoin';
 	import { createLiquidMultisig } from 'pls-liquid';
 	import DropDocument from '$lib/components/DropDocument.svelte';
+	import { page } from '$app/stores';
+	import type { SubCloser } from 'nostr-tools/lib/types/pool';
 
 	let contractsData: Record<string, UnsignedContract> = {};
 
@@ -26,6 +34,9 @@
 	let documentFile: File | undefined;
 	let documentHash: string | undefined;
 	let documentFileName: string | undefined;
+	let relayListeners: SubCloser[] | undefined;
+
+	$: eventId = $page.url.searchParams.get('eventId');
 
 	$: if (documentFile)
 		hashFromFile(documentFile).then((hash) => {
@@ -33,22 +44,57 @@
 			documentFileName = documentFile!.name;
 		});
 
+	$: if (documentHash)
+		tryConnectToRelays().then((listeners) => {
+			relayListeners = listeners;
+		});
+
 	onMount(async () => {
+		relayListeners = await tryConnectToRelays();
+	});
+
+	onDestroy(() => {
+		relayListeners?.forEach((listener) => listener.close());
+	});
+
+	async function tryConnectToRelays() {
+		if (!eventId) return;
+
+		if (!documentHash) return;
+
 		if (await nostrAuth.tryLogin()) {
 			if (!$nostrAuth?.pubkey) return;
 
-			relayPool.subscribeMany(
+			const eventIds = [eventId];
+
+			const tweakedPubkey = tweakContractPubkey(documentHash, $nostrAuth.pubkey);
+
+			const contractListener = relayPool.subscribeMany(
 				relayList,
 				[
 					{
 						kinds: [ContractRequestEvent],
-						'#p': [$nostrAuth.pubkey]
+						ids: eventIds,
+						'#h': [tweakedPubkey]
 					}
 				],
 				{
 					async onevent(e) {
+						const encryptedContractPrivkeyTag =
+							e.tags.filter((tag) => tag[0] === 'secret').find((tag) => tag[1] === tweakedPubkey) ||
+							[];
+
+						const encryptedContractPrivkey = encryptedContractPrivkeyTag[2];
+
+						if (encryptedContractPrivkey === undefined)
+							throw new Error('Pubkey not found in allowed pubkeys list');
+
+						const contractPrivkey = await nostrAuth.decryptDM(e.pubkey, encryptedContractPrivkey);
+
+						const contractEncryptDm = nostrEncryptDmFactory(contractPrivkey);
+
 						const data = JSON.parse(
-							await nostrAuth.decryptDM(e.pubkey, e.content)
+							await contractEncryptDm.decryptDM(e.pubkey, e.content)
 						) as ContractRequestPayload;
 
 						contractsData[data.fileHash] = {
@@ -90,12 +136,13 @@
 				}
 			);
 
-			relayPool.subscribeMany(
+			const signaturesListener = relayPool.subscribeMany(
 				relayList,
 				[
 					{
 						kinds: [ContractApprovalEvent],
-						'#p': [$nostrAuth.pubkey]
+						'#h': [tweakedPubkey],
+						'#d': eventIds
 					}
 				],
 				{
@@ -110,11 +157,22 @@
 					}
 				}
 			);
+
+			return [contractListener, signaturesListener];
 		}
-	});
+	}
+
+	function handleCopyContractLink() {
+		navigator.clipboard.writeText(document.location.href);
+		alert('Link copied to clipboard');
+	}
 
 	async function handleApprove(fileHash: string) {
 		if (!$nostrAuth?.pubkey) return;
+
+		if (!eventId) return;
+
+		if (!documentHash) return;
 
 		const dataToSign = contractsData[fileHash];
 
@@ -137,8 +195,11 @@
 		for (const pubkey of pubkeys) {
 			const encryptedText = await nostrAuth.encryptDM(pubkey, payload);
 
+			const tweakedPubkey = tweakContractPubkey(documentHash, pubkey);
+
 			const event = await nostrAuth.makeEvent(ContractApprovalEvent, encryptedText, [
-				['p', pubkey]
+				['h', tweakedPubkey],
+				['d', eventId]
 			]);
 
 			broadcastToNostr(event);
@@ -248,8 +309,6 @@
 			<p>{data.collateral.arbitratorsQuorum} arbitrators need to agree</p>
 			<p>Network: {data.collateral.network}</p>
 
-			<DropDocument bind:file={documentFile} />
-
 			{#if data.document.fileHash === documentHash}
 				{#key contractSignatures}
 					<Button
@@ -263,6 +322,11 @@
 				<p>Contract text doesn't match!</p>
 			{/if}
 
+			{#if eventId}
+				<p class="text-center">Send this contract link to the involved parties:</p>
+				<Button on:click={handleCopyContractLink}>📋 Copy link</Button>
+			{/if}
+
 			{#key contractSignatures}
 				{#if hasAllSignatures(data.document.fileHash)}
 					<Button on:click={() => exportContract(data.document.fileHash)}>Export contract</Button>
@@ -270,8 +334,13 @@
 			{/key}
 		{:else}
 			<div class="flex justify-center">
-				<p>You have no pending contract requests</p>
+				{#if !documentFile && eventId}
+					<p>Drop contract document to have access to the contract</p>
+				{:else}
+					<p>You have no pending contract requests</p>
+				{/if}
 			</div>
 		{/each}
+		<DropDocument bind:file={documentFile} />
 	</div>
 </div>

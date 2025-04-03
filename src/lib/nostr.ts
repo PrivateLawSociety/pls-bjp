@@ -59,6 +59,25 @@ export function getOldestEvent(events: Event[]) {
 	return lastEvent;
 }
 
+export function nostrEncryptDmFactory(privkey: string | undefined) {
+	return {
+		async encryptDM(otherPubkey: string, text: string) {
+			if (privkey) {
+				return await nip04.encrypt(privkey, otherPubkey, text);
+			} else {
+				return await window.nostr!.nip04.encrypt(otherPubkey, text);
+			}
+		},
+		async decryptDM(otherPubkey: string, text: string) {
+			if (privkey) {
+				return await nip04.decrypt(privkey, otherPubkey, text);
+			} else {
+				return await window.nostr!.nip04.decrypt(otherPubkey, text);
+			}
+		}
+	};
+}
+
 export let nostrAuth = (() => {
 	let initialPrivateKey = sessionStorage.getItem('private-key');
 
@@ -131,24 +150,7 @@ public key: ${pubkey}`
 				return loginWithRandomKeys();
 			}
 		},
-		async encryptDM(otherPubkey: string, text: string) {
-			const privkey = get(store)?.privkey;
-
-			if (privkey) {
-				return await nip04.encrypt(privkey, otherPubkey, text);
-			} else {
-				return await window.nostr!.nip04.encrypt(otherPubkey, text);
-			}
-		},
-		async decryptDM(otherPubkey: string, text: string) {
-			const privkey = get(store)?.privkey;
-
-			if (privkey) {
-				return await nip04.decrypt(privkey, otherPubkey, text);
-			} else {
-				return await window.nostr!.nip04.decrypt(otherPubkey, text);
-			}
-		},
+		...nostrEncryptDmFactory(get(store)?.privkey),
 		async makeEvent(kind: number, content: string, tags: string[][]) {
 			const { pubkey, privkey } = get(store)!;
 
