@@ -3,24 +3,10 @@ import * as liquid from 'liquidjs-lib';
 
 import ECPairFactory from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
-import { toXOnly } from 'bitcoinjs-lib/src/psbt/bip371';
 
 export const ECPair = ECPairFactory(ecc);
 
 bitcoin.initEccLib(ecc);
-
-// Tweak should have exactly 32 bytes. Perhaps a hash
-export function tweakPublicKey(pubkey: Buffer, tweak: Buffer) {
-	const xOnlyPubkey = toXOnly(pubkey);
-
-	const tweakedPubkey = ecc.xOnlyPointAddTweak(xOnlyPubkey, tweak);
-
-	if (!tweakedPubkey) throw new Error('Cannot tweak public key');
-
-	const parityByte = Buffer.from([tweakedPubkey.parity ? 0x02 : 0x03]);
-
-	return Buffer.concat([parityByte, Buffer.from(tweakedPubkey.xOnlyPubkey)]);
-}
 
 export const bitcoinNetworkNames = ['bitcoin', 'bitcoin_testnet'] as const;
 

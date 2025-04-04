@@ -1,6 +1,8 @@
-import { tweakPublicKey, type LiquidNetworkNames, isLiquidNetworkName, type BitcoinNetworkNames, isBitcoinNetworkName } from '$lib/bitcoin';
+import { type LiquidNetworkNames, isLiquidNetworkName, type BitcoinNetworkNames, isBitcoinNetworkName } from '$lib/bitcoin';
 import type { ECPairInterface } from 'ecpair';
+import { createKeyTweaker } from 'pls-bitcoin';
 import { hashFromJSON } from 'pls-core';
+import { toXOnly } from "bitcoinjs-lib/src/psbt/bip371";
 
 import {
 	contractSchema,
@@ -54,7 +56,11 @@ export function tweakContractPubkey(fileHash: string, pubkey: string) {
 	const pubkeyBuffer = Buffer.from('02' + pubkey, 'hex');
 	const tweak = Buffer.from(fileHash, 'hex');
 
-	const tweakedPubkey = tweakPublicKey(pubkeyBuffer, tweak);
+	const tweaker = createKeyTweaker({
+		pubkey: pubkeyBuffer,
+	});
+
+	const tweakedPubkey = toXOnly(tweaker.tweakPubkey(tweak));
 
 	return tweakedPubkey.toString('hex');
 }
