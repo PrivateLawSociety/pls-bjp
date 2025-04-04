@@ -20,7 +20,7 @@
 	import DropDocument from '$lib/components/DropDocument.svelte';
 	import { isLiquidNetworkContract, tryParseFinishedContract } from '$lib/pls/contract';
 	import { ECPair, getNetworkByName } from '$lib/bitcoin';
-	import { signBitcoinTaprootTransaction } from 'pls-bitcoin';
+	import { createKeyTweaker, signBitcoinTaprootTransaction } from 'pls-bitcoin';
 
 	let psbtsMetadataStringified = '';
 
@@ -167,6 +167,16 @@
 
 		if (!pubkey) return;
 
+		const tweak = Buffer.from(contractData.document.fileHash, 'hex');
+
+		const tweakedPubkey = (() => {
+			const tweaker = createKeyTweaker({
+				pubkey: Buffer.from(pubkey, 'hex'),
+			});
+
+			return tweaker.tweakPubkey(tweak).toString('hex');
+		})();
+
 		const {
 			isLiquid,
 			network,
@@ -176,8 +186,6 @@
 		const signer = nostrAuth.getSigner(networkName);
 
 		if (!signer) return;
-
-		const tweak = Buffer.from(contractData.document.fileHash, 'hex');
 
 		if (isLiquidNetworkContract(contractData) && isLiquid) {
 			const blindingKeypair = ECPair.fromPrivateKey(Buffer.from(contractData.collateral.privateBlindingKey, 'hex'));
@@ -193,7 +201,7 @@
 
 			generatedPSBTsMetadata = await Promise.all(
 				psbtsMetadata
-					.filter(({ pubkeys }) => pubkeys.includes(pubkey))
+					.filter(({ pubkeys }) => pubkeys.includes(tweakedPubkey))
 					.map(async (metadata) => {
 						if (!isLiquid) throw new Error('Network is not liquid');
 
@@ -255,7 +263,7 @@
 		} else {
 			generatedPSBTsMetadata = await Promise.all(
 				psbtsMetadata
-					.filter(({ pubkeys }) => pubkeys.includes('02' + pubkey))
+					.filter(({ pubkeys }) => pubkeys.includes(tweakedPubkey))
 					.map(async (metadata) => {
 						const psbt = Psbt.fromHex(metadata.psbtHex, { network: network });
 
