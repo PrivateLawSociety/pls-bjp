@@ -12,14 +12,14 @@ const config = {
 			'pls-core': './node_modules/pls-lib/packages/pls-core/index',
 			'pls-full': './node_modules/pls-lib/packages/pls-full/index',
 			'pls-liquid': './node_modules/pls-lib/packages/pls-liquid/index',
-			'pls-nostr': './node_modules/pls-lib/packages/pls-nostr'
+			'pls-nostr': './node_modules/pls-lib/packages/pls-nostr',
 
 			// If you want to use pls-lib locally
-			// 'pls-bitcoin': '../pls-lib/packages/pls-bitcoin',
-			// 'pls-core': '../pls-lib/packages/pls-core',
-			// 'pls-full': '../pls-lib/packages/pls-full',
-			// 'pls-liquid': '../pls-lib/packages/pls-liquid',
-			// 'pls-nostr': '../pls-lib/packages/pls-nostr'
+			// 'pls-bitcoin': '../pls-lib/packages/pls-bitcoin/index',
+			// 'pls-core': '../pls-lib/packages/pls-core/index',
+			// 'pls-full': '../pls-lib/packages/pls-full/index',
+			// 'pls-liquid': '../pls-lib/packages/pls-liquid/index',
+			// 'pls-nostr': '../pls-lib/packages/pls-nostr',
 		},
 		adapter: adapter({ runtime: 'nodejs20.x' })
 	}
