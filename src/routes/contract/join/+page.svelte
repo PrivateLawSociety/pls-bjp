@@ -100,7 +100,7 @@
 
 						const blindingKeypair = ECPair.fromPrivateKey(Buffer.from(contractPrivkey, 'hex'));
 
-						const tweak = Buffer.from(data.fileHash);
+						const tweak = Buffer.from(data.fileHash, 'hex');
 
 						contractsData[data.fileHash] = {
 							collateral: {
