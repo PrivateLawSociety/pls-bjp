@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createBitcoinMultisig, startTxSpendingFromMultisig } from 'pls-bitcoin';
+	import { createBitcoinMultisig, createKeyTweaker, startTxSpendingFromMultisig } from 'pls-bitcoin';
 	import Button from '$lib/components/Button.svelte';
 	import LabelledInput from '$lib/components/LabelledInput.svelte';
 	import { tryParseFinishedContract, isLiquidNetworkContract } from '$lib/pls/contract';
@@ -17,6 +17,7 @@
 		startSpendFromLiquidMultisig
 	} from 'pls-liquid';
 	import DropContract from '$lib/components/DropContract.svelte';
+	import { toXOnly } from 'bitcoinjs-lib/src/psbt/bip371';
 
 	let utxos: (UTXO & { hex?: string })[] | null = null;
 
@@ -145,9 +146,19 @@
 
 		const pubkey = $nostrAuth?.pubkey;
 
+		if (!pubkey) return alert("Pubkey is not present. Did you logged in?");
+
 		const { network, isLiquid } = getNetworkByName(contractData.collateral.network);
 
 		const tweak = Buffer.from(contractData.document.fileHash, 'hex');
+
+		const tweakedPubkey = (() => {
+			const tweaker = createKeyTweaker({
+				pubkey: Buffer.from(pubkey, 'hex'),
+			});
+
+			return tweaker.tweakPubkey(tweak).toString("hex");
+		})()
 
 		if (isLiquidNetworkContract(contractData) && isLiquid) {
 			const blindingKeypair = ECPair.fromPrivateKey(Buffer.from(contractData.collateral.privateBlindingKey, 'hex'));
@@ -165,7 +176,7 @@
 			// const oneDayInSeconds = 60 * 60 * 24;
 
 			const possibleScripts = multisigScripts.filter(({ combination }) =>
-				combination.some((ecpair) => ecpair === pubkey)
+				combination.some((ecpair) => ecpair === tweakedPubkey)
 			);
 
 			generatedPSBTsMetadata = [];
@@ -182,7 +193,7 @@
 					})),
 					network,
 					signer,
-					receivingAddresses: addresses.filter(({ address}) => address.trim() !== ''),
+					receivingAddresses: addresses.filter(({ address }) => address.trim() !== ''),
 					blindingKeypair,
 					tweak,
 				});
@@ -211,7 +222,7 @@
 			});
 
 			const possibleScripts = multisigScripts.filter(({ combination }) =>
-				combination.some((ecpair) => ecpair.publicKey.toString('hex') === '02' + pubkey)
+				combination.some((ecpair) => ecpair.publicKey.toString('hex') === tweakedPubkey)
 			);
 
 			generatedPSBTsMetadata = [];
