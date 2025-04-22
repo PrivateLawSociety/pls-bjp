@@ -222,7 +222,7 @@
 			});
 
 			const possibleScripts = multisigScripts.filter(({ combination }) =>
-				combination.some((ecpair) => ecpair.publicKey.toString('hex') === tweakedPubkey)
+				combination.some((ecpair) => ecpair.publicKey.toString('hex') === '02' + pubkey)
 			);
 
 			generatedPSBTsMetadata = [];
