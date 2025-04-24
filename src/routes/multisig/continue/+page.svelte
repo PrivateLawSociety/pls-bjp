@@ -169,14 +169,6 @@
 
 		const tweak = Buffer.from(contractData.document.fileHash, 'hex');
 
-		const tweakedPubkey = (() => {
-			const tweaker = createKeyTweaker({
-				pubkey: Buffer.from(pubkey, 'hex'),
-			});
-
-			return tweaker.tweakPubkey(tweak).toString('hex');
-		})();
-
 		const {
 			isLiquid,
 			network,
@@ -201,7 +193,7 @@
 
 			generatedPSBTsMetadata = await Promise.all(
 				psbtsMetadata
-					.filter(({ pubkeys }) => pubkeys.includes(tweakedPubkey))
+					.filter(({ pubkeys }) => pubkeys.includes(pubkey))
 					.map(async (metadata) => {
 						if (!isLiquid) throw new Error('Network is not liquid');
 

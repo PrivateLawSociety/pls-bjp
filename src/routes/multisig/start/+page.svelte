@@ -17,7 +17,6 @@
 		startSpendFromLiquidMultisig
 	} from 'pls-liquid';
 	import DropContract from '$lib/components/DropContract.svelte';
-	import { toXOnly } from 'bitcoinjs-lib/src/psbt/bip371';
 
 	let utxos: (UTXO & { hex?: string })[] | null = null;
 
@@ -152,14 +151,6 @@
 
 		const tweak = Buffer.from(contractData.document.fileHash, 'hex');
 
-		const tweakedPubkey = (() => {
-			const tweaker = createKeyTweaker({
-				pubkey: Buffer.from(pubkey, 'hex'),
-			});
-
-			return tweaker.tweakPubkey(tweak).toString("hex");
-		})()
-
 		if (isLiquidNetworkContract(contractData) && isLiquid) {
 			const blindingKeypair = ECPair.fromPrivateKey(Buffer.from(contractData.collateral.privateBlindingKey, 'hex'));
 
@@ -176,7 +167,7 @@
 			// const oneDayInSeconds = 60 * 60 * 24;
 
 			const possibleScripts = multisigScripts.filter(({ combination }) =>
-				combination.some((ecpair) => ecpair === tweakedPubkey)
+				combination.some((ecpair) => ecpair === pubkey)
 			);
 
 			generatedPSBTsMetadata = [];
