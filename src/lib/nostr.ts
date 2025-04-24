@@ -59,16 +59,7 @@ export function getOldestEvent(events: Event[]) {
 	return lastEvent;
 }
 
-type NostrEncryptDmFactoryReturn<T extends (string | undefined)> = T extends string ? {
-	encryptDM: (otherPubkey: string, text: string) => Promise<string>;
-	decryptDM: (otherPubkey: string, text: string) => Promise<string>;
-} : {};
-
-export function nostrEncryptDmFactory<T extends string | undefined>(privkey: T): NostrEncryptDmFactoryReturn<T> {
-	if (!privkey) {
-		return {} as NostrEncryptDmFactoryReturn<typeof privkey>
-	}
-
+export function nostrEncryptDmFactory(privkey: string) {
 	return {
 		async encryptDM(otherPubkey: string, text: string) {
 			return await nip04.encrypt(privkey, otherPubkey, text);
@@ -135,7 +126,7 @@ public key: ${pubkey}`
 
 			return loginWithRandomKeys();
 		},
-		...nostrEncryptDmFactory(get(store)?.privkey),
+		...nostrEncryptDmFactory(get(store)?.privkey as string),
 		async makeEvent(kind: number, content: string, tags: string[][]) {
 			const { privkey } = get(store)!;
 
