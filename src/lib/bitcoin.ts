@@ -24,7 +24,7 @@ export function isValidNetworkName(name: string): name is NetworkNames {
 	return networkNames.includes(name as NetworkNames);
 }
 
-export function isLiquidNetworkName(networkName: NetworkNames): networkName is "liquid" | "liquid_testnet" {
+export function isLiquidNetworkName(networkName: NetworkNames): networkName is LiquidNetworkNames {
 	return liquidNetworkNames.includes(networkName as LiquidNetworkNames);
 }
 
@@ -32,7 +32,7 @@ export function isBitcoinNetworkName(networkName: NetworkNames): networkName is 
 	return bitcoinNetworkNames.includes(networkName as BitcoinNetworkNames);
 }
 
-export function getNetworkByName<T>(networkName: NetworkNames): { isTestnet: boolean } & (
+export function getNetworkByName(networkName: NetworkNames): { isTestnet: boolean } & (
 	| {
 			isLiquid: false;
 			network: bitcoin.networks.Network;
