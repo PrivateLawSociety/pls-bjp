@@ -39,9 +39,6 @@
 
 	let replacingByFee = false;
 
-	$: network = contractData ? getNetworkByName(contractData.collateral.network) : null;
-	$: mempool = network ? createMempoolApi(network) : null;
-
 	$: if ($contractDataFileStore) onContractDataFileSelected($contractDataFileStore);
 
 	$: availableBalance = utxos?.reduce((acc, utxo) => acc + utxo.value, 0) ?? 0;
@@ -70,11 +67,17 @@
 	async function onContractDataFileSelected(file: File) {
 		contractData = tryParseFinishedContract(await file.text());
 
-		onContractSelected();
+		await onContractSelected();
 	}
 
 	async function onContractSelected() {
-		if (!contractData || !mempool) return;
+		if (!contractData) return;
+
+		const network = getNetworkByName(contractData.collateral.network);
+
+		const mempool = createMempoolApi(network);
+
+		if (!mempool) return;
 
 		utxos = await mempool.getAddressUtxos(contractData.collateral.multisigAddress);
 
