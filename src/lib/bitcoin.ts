@@ -3,26 +3,20 @@ import * as liquid from 'liquidjs-lib';
 
 import ECPairFactory from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
-import { toXOnly } from 'bitcoinjs-lib/src/psbt/bip371';
 
 export const ECPair = ECPairFactory(ecc);
 
 bitcoin.initEccLib(ecc);
 
-// Tweak should have exactly 32 bytes. Perhaps a hash
-export function tweakPublicKey(pubkey: Buffer, tweak: Buffer) {
-	const xOnlyPubkey = toXOnly(pubkey);
+export const bitcoinNetworkNames = ['bitcoin', 'bitcoin_testnet'] as const;
 
-	const tweakedPubkey = ecc.xOnlyPointAddTweak(xOnlyPubkey, tweak);
+export type BitcoinNetworkNames = (typeof bitcoinNetworkNames)[number];
 
-	if (!tweakedPubkey) throw new Error('Cannot tweak public key');
+export const liquidNetworkNames = ['liquid', 'liquid_testnet'] as const;
 
-	const parityByte = Buffer.from([tweakedPubkey.parity ? 0x02 : 0x03]);
+export type LiquidNetworkNames = (typeof liquidNetworkNames)[number];
 
-	return Buffer.concat([parityByte, Buffer.from(tweakedPubkey.xOnlyPubkey)]);
-}
-
-export const networkNames = ['bitcoin', 'bitcoin_testnet', 'liquid', 'liquid_testnet'] as const;
+export const networkNames = [...bitcoinNetworkNames, ...liquidNetworkNames] as const;
 
 export type NetworkNames = (typeof networkNames)[number];
 
@@ -30,16 +24,24 @@ export function isValidNetworkName(name: string): name is NetworkNames {
 	return networkNames.includes(name as NetworkNames);
 }
 
+export function isLiquidNetworkName(networkName: NetworkNames): networkName is LiquidNetworkNames {
+	return liquidNetworkNames.includes(networkName as LiquidNetworkNames);
+}
+
+export function isBitcoinNetworkName(networkName: NetworkNames): networkName is BitcoinNetworkNames {
+	return bitcoinNetworkNames.includes(networkName as BitcoinNetworkNames);
+}
+
 export function getNetworkByName(networkName: NetworkNames): { isTestnet: boolean } & (
 	| {
 			isLiquid: false;
 			network: bitcoin.networks.Network;
-			name: 'bitcoin' | 'bitcoin_testnet';
+			name: BitcoinNetworkNames;
 	  }
 	| {
 			isLiquid: true;
 			network: liquid.networks.Network;
-			name: 'liquid' | 'liquid_testnet';
+			name: LiquidNetworkNames;
 	  }
 ) {
 	if (networkName === 'bitcoin')

@@ -15,8 +15,8 @@ importers:
         specifier: 3.1.0
         version: 3.1.0
       bitcoinjs-lib:
-        specifier: ^6.1.4
-        version: 6.1.4
+        specifier: ^6.1.5
+        version: 6.1.5
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -738,8 +738,8 @@ packages:
   bip66@1.1.5:
     resolution: {integrity: sha512-nemMHz95EmS38a26XbbdxIYj5csHd3RMP3H5bwQknX0WYHF01qhpufP42mLOwVICuH2JmhIhXiWs89MfUGL7Xw==}
 
-  bitcoinjs-lib@6.1.4:
-    resolution: {integrity: sha512-MRbVBPJ0DI7nhnisoFYVbUGMQwZDrkfkTuZghtsblokq3OYRMuek2We1jhpAqDVwtM3CrO7AbwANdBZ/KgzQyg==}
+  bitcoinjs-lib@6.1.5:
+    resolution: {integrity: sha512-yuf6xs9QX/E8LWE2aMJPNd0IxGofwfuVOiYdNUESkc+2bHHVKjhJd8qewqapeoolh9fihzHGoDCB5Vkr57RZCQ==}
     engines: {node: '>=8.0.0'}
 
   bitset@5.1.1:
@@ -2442,7 +2442,7 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
-  bitcoinjs-lib@6.1.4:
+  bitcoinjs-lib@6.1.5:
     dependencies:
       '@noble/hashes': 1.3.2
       bech32: 2.0.0
@@ -3025,7 +3025,7 @@ snapshots:
       bech32: 2.0.0
       bip174-liquid: 1.0.3
       bip66: 1.1.5
-      bitcoinjs-lib: 6.1.4
+      bitcoinjs-lib: 6.1.5
       bitset: 5.1.1
       blech32: 1.1.2
       bs58check: 2.1.2

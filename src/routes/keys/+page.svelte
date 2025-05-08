@@ -1,13 +1,8 @@
 <script lang="ts">
 	import { nostrAuth } from '$lib/nostr';
-	import { onMount } from 'svelte';
 	import { Button } from 'flowbite-svelte';
 	import { goto } from '$app/navigation';
 	import { nip19 } from 'nostr-tools';
-
-	onMount(() => {
-		if (window.nostr) nostrAuth.tryLogin();
-	});
 </script>
 
 <div class="flex flex-col items-center justify-center h-screen w-full gap-4">
