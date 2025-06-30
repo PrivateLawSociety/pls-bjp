@@ -17,9 +17,11 @@ This means the arbitrators can't run off with the money by themselves, but they 
 
 [PLS Youtube channel](https://www.youtube.com/@privatelawsociety)
 
-[PLS Twitter page](https://twitter.com/PrivateLawSoc)
+[PLS X page](https://x.com/PrivateLawSoc)
 
-[Hosted website for the MVP](https://pls-mvp.vercel.app/)
+[PLS Nostr page](https://njump.me/npub1p79dx59d5gctllar73cqnucqft89gpkfmydxj4mmk2jj69s7hn3sfjatxx)
+
+[Hosted website for the MVP](https://pls-bjp.vercel.app/)
 
 [🇧🇷] [Podcast episode about PLS](https://www.youtube.com/watch?v=NGx7h9kpPE8)
 
