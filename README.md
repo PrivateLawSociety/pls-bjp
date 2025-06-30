@@ -1,15 +1,15 @@
-# Private Law Society MVP (Minimum Viable Product)
+# Bitcoin Justice Protocol - Private Law Society (Minimum Viable Product)
 
 [**[🇧🇷] Versão em português: LEIAME.md**](LEIAME.md)
 
 ## TL;DR
 
-PLS (Private Law Society) is a project seeking to support the creation of contracts where both parties agree on an arbitrator (or multiple arbitrators) and Bitcoin is used as collateral, so that the contract has its due enforcement. The parties send the necessary collateral to the contract, where it can be later redeemed if either:
+Bitcoin Justice Protocol (BJP) is a core component of the Private Law Society (PLS), designed to facilitate the creation of decentralized contracts with enforceable terms. Through BJP, both parties agree on an arbitrator (or multiple arbitrators) and use Bitcoin as collateral to ensure the contract's fulfillment. The parties send the necessary collateral to the contract, where it can be later redeemed if either:
 
 1. Both parties agree
 2. One of the parties + the arbitrators agree
 
-This means the arbitrators can't run off with the money by themselves, but they can still financially punish the other party.
+This mechanism prevents arbitrators from running off with the funds, while still allowing them to financially penalize the party that fails to comply. By leveraging Bitcoin, the BJP provides a secure, trustless, and decentralized enforcement system, ensuring fairness and accountability in private contract disputes.
 
 ## Useful links
 
