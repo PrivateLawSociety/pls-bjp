@@ -1,10 +1,10 @@
-# MVP (Produto Mínimo Viável) da Private Law Society
+# Bitcoin Justice Protocol - Private Law Society
 
 [**[🇺🇸] English version: README.md**](README.md)
 
 ## Resumo
 
-PLS (Private Law Society) é um projeto que busca possibilitar a criação de contratos onde ambas as partes escolhem um árbitro (ou múltiplos árbitros) e o Bitcoin é utilizado como garantia, para que o contrato tenha sua devida execução. As partes enviam as garantias necessárias ao contrato, onde poderão ser posteriormente resgatadas se:
+O Bitcoin Justice Protocol (BJP) é um componente essencial da Private Law Society (PLS), desenvolvido para facilitar a criação de contratos descentralizados com termos exequíveis. Através do BJP, ambas as partes concordam com um árbitro (ou múltiplos árbitros) e utilizam Bitcoin como colateral para garantir o cumprimento do contrato. As partes enviam o colateral necessário para o contrato, que pode ser resgatado posteriormente se:
 
 1. Ambas as partes concordarem
 2. Uma das partes + os árbitros concordarem
@@ -17,9 +17,11 @@ Isso significa que os árbitros não podem fugir sozinhos com o dinheiro, mas ai
 
 [Youtube do PLS](https://www.youtube.com/@privatelawsociety)
 
-[Twitter do PLS](https://twitter.com/PrivateLawSoc)
+[Página da PLS no X](https://x.com/PrivateLawSoc)
 
-[Site hospedado do MVP](https://pls-mvp.vercel.app/)
+[Página da PLS no Nostr](https://njump.me/npub1p79dx59d5gctllar73cqnucqft89gpkfmydxj4mmk2jj69s7hn3sfjatxx)
+
+[Site hospedado do MVP da WoT](https://pls-bjp.vercel.app/)
 
 [Episódio de podcast sobre a PLS](https://www.youtube.com/watch?v=NGx7h9kpPE8)
 
