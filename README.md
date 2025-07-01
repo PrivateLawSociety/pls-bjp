@@ -1,4 +1,4 @@
-# Bitcoin Justice Protocol - Private Law Society (Minimum Viable Product)
+# Bitcoin Justice Protocol - Private Law Society
 
 [**[🇧🇷] Versão em português: LEIAME.md**](LEIAME.md)
 
