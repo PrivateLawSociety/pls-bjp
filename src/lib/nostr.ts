@@ -150,7 +150,20 @@ public key: ${pubkey}`
 				return loginWithRandomKeys();
 			}
 		},
-		...nostrEncryptDmFactory(get(store)?.privkey),
+		async encryptDM(otherPubkey: string, text: string) {
+			const privkey = get(store)?.privkey;
+
+			const encryptDm = nostrEncryptDmFactory(privkey);
+
+			return encryptDm.encryptDM(otherPubkey, text);
+		},
+		async decryptDM(otherPubkey: string, text: string) {
+			const privkey = get(store)?.privkey;
+
+			const decryptDm = nostrEncryptDmFactory(privkey);
+
+			return decryptDm.decryptDM(otherPubkey, text);
+		},
 		async makeEvent(kind: number, content: string, tags: string[][]) {
 			const { pubkey, privkey } = get(store)!;
 
