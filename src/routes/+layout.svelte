@@ -2,6 +2,8 @@
 	import '../app.postcss';
 	import { page } from '$app/stores';
 	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger } from 'flowbite-svelte';
+	import HeaderPerson from '$lib/components/HeaderPerson.svelte';
+	import { nostrAuth } from '$lib/nostr';
 </script>
 
 <div class="flex flex-col h-screen">
@@ -26,6 +28,12 @@
 						rel="noopener noreferrer">Guide</a
 					>
 				</NavLi>
+
+				{#if $nostrAuth?.pubkey}
+					<div>
+						<HeaderPerson pubkey={$nostrAuth.pubkey} />
+					</div>
+				{/if}
 			</NavUl>
 		</Navbar>
 	</div>
