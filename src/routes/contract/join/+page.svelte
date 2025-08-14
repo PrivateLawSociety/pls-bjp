@@ -329,7 +329,7 @@
 
 			{#key contractSignatures}
 				{#if hasAllSignatures(data.document.fileHash)}
-					<Button on:click={() => exportContract(data.document.fileHash)}>Export contract</Button>
+					<Button on:click={() => exportContract(data.document.fileHash)}>Export Agreement Proof</Button>
 				{/if}
 			{/key}
 		{:else}
