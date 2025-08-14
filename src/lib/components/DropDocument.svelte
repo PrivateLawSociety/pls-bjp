@@ -16,4 +16,4 @@
 	}
 </script>
 
-<FileDrop dropText={'Drop the contract file here (txt, pdf, word file)'} bind:files={myFiles} />
+<FileDrop dropText={'Drop the contract text here (txt, pdf, word file)'} bind:files={myFiles} />

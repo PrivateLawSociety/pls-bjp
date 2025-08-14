@@ -32,10 +32,10 @@
 		if (!contractData) {
 			$contractDataFileStore = null;
 			return alert(
-				'Contract is invalid. Do not confuse the contract data (.json) with the document (.txt, .pdf, .docx, etc.)'
+				'Contract is invalid. Do not confuse the Agreement Proof (.json) with the Contract Text (.txt, .pdf, .docx, etc.)'
 			);
 		}
 	}
 </script>
 
-<FileDrop dropText={'Drop your contract JSON here'} bind:files />
+<FileDrop dropText={'Drop your Agreement Proof JSON here'} bind:files />
