@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Person from '$lib/components/Person.svelte';
 	import { nostrAuth } from '$lib/nostr';
 	import { Button, P } from 'flowbite-svelte';
 	import { DiscordSolid, GithubSolid, YoutubeSolid, XSolid } from 'flowbite-svelte-icons';
@@ -7,10 +6,6 @@
 
 {#if $nostrAuth?.pubkey}
 	<div class="flex flex-col justify-center items-center h-full gap-8">
-		<a href="/keys">
-			<Person pubkey={$nostrAuth.pubkey} />
-		</a>
-
 		<div class="flex flex-col justify-center items-center gap-4">
 			<a href="/contract/create" class="w-full md:w-auto">
 				<Button class="w-48 md:w-64">Create</Button>
