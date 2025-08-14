@@ -17,23 +17,27 @@
 			</NavBrand>
 			<NavHamburger on:click={toggle} />
 			<NavUl {hidden} activeUrl={$page.url.pathname}>
-				{#if $page.url.pathname !== '/'}
-					<NavLi><button on:click={() => history.back()}>Back</button></NavLi>
-				{/if}
-				<NavLi href="/">Home</NavLi>
-				<NavLi>
-					<a
-						href="https://github.com/PrivateLawSociety/pls-mvp/blob/main/README.md"
-						target="_blank"
-						rel="noopener noreferrer">Guide</a
-					>
-				</NavLi>
+				<div class="flex flex-col items-center gap-4 md:flex-row">
+					{#if $page.url.pathname !== '/'}
+						<NavLi>
+							<button on:click={() => history.back()}>Back</button>
+						</NavLi>
+					{/if}
 
-				{#if $nostrAuth?.pubkey}
-					<div>
-						<HeaderPerson pubkey={$nostrAuth.pubkey} />
-					</div>
-				{/if}
+					<NavLi>
+						<a
+							href="https://github.com/PrivateLawSociety/pls-mvp/blob/main/README.md"
+							target="_blank"
+							rel="noopener noreferrer">Guide</a
+						>
+					</NavLi>
+	
+					{#if $nostrAuth?.pubkey}
+						<div>
+							<HeaderPerson pubkey={$nostrAuth.pubkey} />
+						</div>
+					{/if}
+				</div>
 			</NavUl>
 		</Navbar>
 	</div>
