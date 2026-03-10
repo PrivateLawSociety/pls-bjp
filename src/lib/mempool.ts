@@ -14,8 +14,8 @@ export function createMempoolApi(network: { isLiquid: boolean; isTestnet: boolea
 			? `/liquidtestnet/api`
 			: `/testnet/api`
 		: network.isLiquid
-		? `/liquid/api`
-		: `/api`;
+			? `/liquid/api`
+			: `/api`;
 
 	const url = start + end;
 

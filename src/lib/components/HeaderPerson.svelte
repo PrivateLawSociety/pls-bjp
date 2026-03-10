@@ -15,22 +15,26 @@
 <div class="flex flex-col justify-center items-center">
 	<div class="flex items-center gap-4 px-2">
 		{#if $peopleMetadata[pubkey]}
-			<img
-				src={$peopleMetadata[pubkey]?.picture}
-				alt={username}
-				title={nip19.npubEncode(pubkey)}
-				class="w-10 h-10 rounded-full object-contain"
-			/>
+			<a href="/keys" class="cursor-pointer">
+				<img
+					src={$peopleMetadata[pubkey]?.picture}
+					alt={username}
+					title={nip19.npubEncode(pubkey)}
+					class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
+				/>
+			</a>
 		{:else}
-			<div class="w-10">
-				<UserSolid size={iconSize} />
-			</div>
+			<a href="/keys" class="cursor-pointer">
+				<div class="w-10 hover:opacity-80 transition-opacity">
+					<UserSolid size={iconSize} />
+				</div>
+			</a>
 		{/if}
-		
-		<div class="font-medium text-white">
+
+		<div class="font-medium text-pls-blue-100">
 			<div>{username || ''}</div>
 			<div class="group relative">
-				<span class="block max-w-24 text-sm text-gray-400">
+				<span class="block max-w-24 text-sm text-pls-blue-50">
 					{`${nip19.npubEncode(pubkey).slice(0, 5)}...${nip19.npubEncode(pubkey).slice(-5)}`}
 				</span>
 

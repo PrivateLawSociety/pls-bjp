@@ -8,7 +8,8 @@
 	export let contractData: Contract | null = null;
 	export let file: File | null = null;
 
-	export let onSelected = () => {};
+	export let onSelected = () => {
+	};
 
 	$: file = $contractDataFileStore;
 
@@ -32,7 +33,7 @@
 		if (!contractData) {
 			$contractDataFileStore = null;
 			return alert(
-				'Contract is invalid. Do not confuse the Agreement Proof (.json) with the Contract Text (.txt, .pdf, .docx, etc.)'
+				'Contract is invalid. Do not confuse the Agreement Proof (.json) with the Contract Text (.txt, .pdf, .docx etc.)'
 			);
 		}
 	}

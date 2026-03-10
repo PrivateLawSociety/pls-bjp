@@ -1,11 +1,4 @@
-import {
-	getPublicKey,
-	SimplePool,
-	type Event,
-	generateSecretKey,
-	nip04,
-	finalizeEvent
-} from 'nostr-tools';
+import { type Event, finalizeEvent, generateSecretKey, getPublicKey, nip04, SimplePool } from 'nostr-tools';
 import { get, writable } from 'svelte/store';
 import { ECPair, getNetworkByName, type NetworkNames } from './bitcoin';
 import { Buffer } from 'buffer';
@@ -84,9 +77,9 @@ export let nostrAuth = (() => {
 	const store = writable<{ privkey?: string; pubkey: string } | null>(
 		initialPrivateKey
 			? {
-					privkey: initialPrivateKey,
-					pubkey: getPublicKey(Uint8Array.from(Buffer.from(initialPrivateKey, 'hex')))
-			  }
+				privkey: initialPrivateKey,
+				pubkey: getPublicKey(Uint8Array.from(Buffer.from(initialPrivateKey, 'hex')))
+			}
 			: null
 	);
 
@@ -194,7 +187,7 @@ public key: ${pubkey}`
 				return ecpair;
 			} else if (pubkey) {
 				if (!window.nostr?.signSchnorr)
-					return alert("Your extension doesn't support signing") as undefined;
+					return alert('Your extension doesn\'t support signing') as undefined;
 
 				return {
 					publicKey: Buffer.from('02' + pubkey, 'hex'),
