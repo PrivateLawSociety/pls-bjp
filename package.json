@@ -1,55 +1,55 @@
 {
-	"name": "pls-mvp",
-	"author": {
-		"name": "marcusmmmz"
-	},
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"preview": "vite preview",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --plugin-search-dir . --check .",
-		"format": "prettier --plugin-search-dir . --write ."
-	},
-	"type": "module",
-	"devDependencies": {
-		"@esbuild-plugins/node-globals-polyfill": "^0.2.3",
-		"@sveltejs/adapter-auto": "^2.0.0",
-		"@sveltejs/adapter-vercel": "^3.1.0",
-		"@sveltejs/kit": "^1.30.4",
-		"autoprefixer": "^10.4.14",
-		"postcss": "^8.4.24",
-		"postcss-load-config": "^4.0.1",
-		"prettier": "^2.8.0",
-		"prettier-plugin-svelte": "^2.10.1",
-		"svelte": "^4.0.5",
-		"svelte-check": "^3.4.3",
-		"tailwindcss": "^3.3.2",
-		"tslib": "^2.4.1",
-		"typescript": "^5.0.0",
-		"vite": "^4.4.2",
-		"vite-plugin-node-polyfills": "^0.14.0",
-		"vite-plugin-top-level-await": "^1.3.1",
-		"vite-plugin-wasm": "^3.2.2"
-	},
-	"dependencies": {
-		"@popperjs/core": "^2.11.8",
-		"@vulpemventures/secp256k1-zkp": "3.1.0",
-		"bitcoinjs-lib": "^6.1.4",
-		"buffer": "^6.0.3",
-		"ecpair": "^2.1.0",
-		"flowbite": "^2.3.0",
-		"flowbite-svelte": "^0.45.0",
-		"flowbite-svelte-icons": "^1.5.0",
-		"liquidjs-lib": "6.0.2-liquid.32",
-		"nostr-tools": "^2.7.1",
-		"pls-lib": "github:PrivateLawSociety/pls-lib",
-		"qrcode-generator": "^1.4.4",
-		"tailwind-merge": "^2.2.2",
-		"tiny-secp256k1": "^2.2.3",
-		"zod": "^3.22.4"
-	}
+  "name": "pls-mvp",
+  "author": {
+    "name": "marcusmmmz"
+  },
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "prettier --plugin-search-dir . --check .",
+    "format": "prettier --plugin-search-dir . --write ."
+  },
+  "type": "module",
+  "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@sveltejs/adapter-auto": "^2.0.0",
+    "@sveltejs/adapter-vercel": "^3.1.0",
+    "@sveltejs/kit": "^1.30.4",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.24",
+    "postcss-load-config": "^4.0.1",
+    "prettier": "^2.8.0",
+    "prettier-plugin-svelte": "^2.10.1",
+    "svelte": "^4.0.5",
+    "svelte-check": "^3.4.3",
+    "tailwindcss": "^3.3.2",
+    "tslib": "^2.4.1",
+    "typescript": "^5.0.0",
+    "vite": "^4.4.2",
+    "vite-plugin-node-polyfills": "^0.14.0",
+    "vite-plugin-top-level-await": "^1.3.1",
+    "vite-plugin-wasm": "^3.2.2"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "@vulpemventures/secp256k1-zkp": "3.1.0",
+    "bitcoinjs-lib": "^6.1.4",
+    "buffer": "^6.0.3",
+    "ecpair": "^2.1.0",
+    "flowbite": "^2.3.0",
+    "flowbite-svelte": "^0.45.0",
+    "flowbite-svelte-icons": "^1.5.0",
+    "liquidjs-lib": "6.0.2-liquid.32",
+    "nostr-tools": "^2.7.1",
+    "pls-lib": "github:PrivateLawSociety/pls-lib",
+    "qrcode-generator": "^1.4.4",
+    "tailwind-merge": "^2.2.2",
+    "tiny-secp256k1": "^2.2.3",
+    "zod": "^3.22.4"
+  }
 }

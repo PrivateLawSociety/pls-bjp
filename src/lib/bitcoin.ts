@@ -32,16 +32,16 @@ export function isValidNetworkName(name: string): name is NetworkNames {
 
 export function getNetworkByName(networkName: NetworkNames): { isTestnet: boolean } & (
 	| {
-			isLiquid: false;
-			network: bitcoin.networks.Network;
-			name: 'bitcoin' | 'bitcoin_testnet';
-	  }
+	isLiquid: false;
+	network: bitcoin.networks.Network;
+	name: 'bitcoin' | 'bitcoin_testnet';
+}
 	| {
-			isLiquid: true;
-			network: liquid.networks.Network;
-			name: 'liquid' | 'liquid_testnet';
-	  }
-) {
+	isLiquid: true;
+	network: liquid.networks.Network;
+	name: 'liquid' | 'liquid_testnet';
+}
+	) {
 	if (networkName === 'bitcoin')
 		return {
 			isLiquid: false,

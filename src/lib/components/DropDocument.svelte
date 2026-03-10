@@ -4,7 +4,8 @@
 	let myFiles: FileList | null;
 
 	export let file: File | null = null;
-	export let onFileSelected = (file: File) => {};
+	export let onFileSelected = (file: File) => {
+	};
 
 	$: {
 		const newFile = myFiles?.item(0);

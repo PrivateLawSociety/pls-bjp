@@ -3,6 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-	@apply bg-slate-900 text-white;
+body {
+    @apply bg-pls-bg text-white;
 }
+

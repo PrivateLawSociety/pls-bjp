@@ -9,6 +9,7 @@ declare global {
 		// interface PageData {}
 		// interface Platform {}
 	}
+
 	interface Window {
 		nostr?: {
 			signSchnorr(hash: string): Promise<string>;
