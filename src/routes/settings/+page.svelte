@@ -1,5 +1,5 @@
 <script>
-	import { P, Select } from 'flowbite-svelte';
+	import { P } from 'flowbite-svelte';
 	// import { Dropdown, DropdownItem } from 'flowbite-svelte';
 	// import { ChevronDownOutline } from 'flowbite-svelte-icons';
 </script>
@@ -20,3 +20,4 @@
 		</div> -->
 	</div>
 </div>
+<!-- TODO: ADD SETTINGS HERE -->
