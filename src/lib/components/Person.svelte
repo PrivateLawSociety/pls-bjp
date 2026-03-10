@@ -20,11 +20,11 @@
 			src={$peopleMetadata[pubkey]?.picture}
 			alt={username}
 			title={nip19.npubEncode(pubkey)}
-			class="w-20 h-20 rounded-full object-contain"
+			class="w-20 h-20 rounded-full object-cover"
 		/>
 	{:else}
-		<div class="w-20">
-			<UserSolid size={iconSize} />
+		<div class="w-20 border border-gray-500 rounded-full flex items-center justify-center">
+			<UserSolid fill="gray" size={iconSize} />
 		</div>
 	{/if}
 
