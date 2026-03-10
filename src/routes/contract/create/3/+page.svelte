@@ -5,7 +5,7 @@
 	import PersonChooser from '$lib/components/PersonChooser.svelte';
 	import { nostrAuth } from '$lib/nostr';
 	import { peopleMetadata } from '$lib/stores';
-	import { Button, Input, Label, P, Range } from 'flowbite-svelte';
+	import { Button, Label, P, Range } from 'flowbite-svelte';
 
 	const newContract = getContext<Writable<NewContractData>>('contract');
 
@@ -44,39 +44,56 @@
 	$: console.log($newContract.arbitratorsQuorum);
 </script>
 
-<P class="text-2xl">Select arbitrators</P>
-<div class="flex flex-col justify-center items-center gap-4 h-full">
-	<div class="flex gap-4 flex-wrap justify-center items-center">
-		{#each arbitrators as _, i}
-			<PersonChooser
-				people={contactsAndMe}
-				on:selection={(e) => {
-					if (e.detail === null) {
-						arbitrators = arbitrators.filter((_, index) => index !== i);
-					}
-				}}
-				bind:selectedPerson={arbitrators[i]}
-			/>
-		{/each}
-		<PersonChooser
-			people={contactsAndMe}
-			on:selection={(e) => {
-				arbitrators = [...arbitrators, e.detail];
-				newlySelectedPubkey = null;
-			}}
-			bind:selectedPerson={newlySelectedPubkey}
-			placeholderName={'Add new'}
-		/>
-	</div>
-	{#if arbitrators.length > 1}
-		<P class="text-2xl">Arbitrators quorum</P>
-		<div class="mx-12">
-			<Label>This is the minimum number of arbitrators needed to make a decision.</Label>
-			<Range bind:value={arbitratorsQuorum} min={1} max={arbitrators.length || 1} />
+<div class="flex items-center justify-center min-h-[calc(100vh-300px)] w-full p-4">
+	<div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
+		<h2 class="text-2xl font-bold text-pls-blue-100 text-center mb-6">Select Arbitrators</h2>
+
+		<div class="flex flex-col justify-center items-center gap-4 mb-6">
+			<div class="flex gap-4 flex-wrap justify-center items-center">
+				{#each arbitrators as _, i}
+					<PersonChooser
+						people={contactsAndMe}
+						on:selection={(e) => {
+							if (e.detail === null) {
+								arbitrators = arbitrators.filter((_, index) => index !== i);
+							}
+						}}
+						bind:selectedPerson={arbitrators[i]}
+					/>
+				{/each}
+				<PersonChooser
+					people={contactsAndMe}
+					on:selection={(e) => {
+						arbitrators = [...arbitrators, e.detail];
+						newlySelectedPubkey = null;
+					}}
+					bind:selectedPerson={newlySelectedPubkey}
+					placeholderName={'Add new'}
+				/>
+			</div>
+			{#if arbitrators.length > 1}
+				<div class="w-full">
+					<P color="none" class="text-xl font-semibold text-pls-blue-100 text-center mb-2">Arbitrators Quorum</P>
+					<div class="mx-12 text-center">
+						<Label class="!text-pls-blue-50 text-sm">This is the minimum number of arbitrators needed to make a
+							decision.</Label>
+						<Range bind:value={arbitratorsQuorum} min={1} max={arbitrators.length || 1} />
+					</div>
+					<p class="text-center mt-2 font-bold text-pls-blue-100">{arbitratorsQuorum}</p>
+				</div>
+			{/if}
 		</div>
-		<p>{arbitratorsQuorum}</p>
-	{/if}
+
+		<div class="flex justify-center">
+			<a href="/contract/create/4" class="w-full">
+				<Button
+					color="none"
+					class="bg-white w-full text-pls-blue-100 border-2 border-pls-blue-100 hover:bg-pls-blue-50 hover:text-white transition-colors px-8 py-2"
+					disabled={arbitrators.length < 1}
+				>
+					Next
+				</Button>
+			</a>
+		</div>
+	</div>
 </div>
-<a href="/contract/create/4">
-	<Button class="w-48 md:w-52" disabled={arbitrators.length < 1}>Next</Button>
-</a>

@@ -17,7 +17,6 @@
 	import { contractSchema, type UnsignedContract } from 'pls-full';
 
 	import { tweakContractPubkey, signContract } from '$lib/pls/contract';
-	import Button from '$lib/components/Button.svelte';
 	import Person from '$lib/components/Person.svelte';
 	import { downloadBlob, hashFromFile } from '$lib/utils';
 	import { createBitcoinMultisig } from 'pls-bitcoin';
@@ -26,6 +25,7 @@
 	import DropDocument from '$lib/components/DropDocument.svelte';
 	import { page } from '$app/stores';
 	import type { SubCloser } from 'nostr-tools/lib/types/pool';
+	import { Button } from 'flowbite-svelte';
 
 	let contractsData: Record<string, UnsignedContract> = {};
 
@@ -229,31 +229,32 @@
 		].every((pubkey) => Object.keys(contractSignatures[fileHash]).includes(pubkey));
 	}
 
-	function getMultisigAddress({
-		arbitratorsQuorum,
-		arbitrators,
-		clients,
-		network: networkName
-	}: {
-		arbitratorsQuorum: number;
-		arbitrators: string[];
-		clients: string[];
-		network: NetworkNames;
-	}) {
+	function getMultisigAddress(
+		{
+			arbitratorsQuorum,
+			arbitrators,
+			clients,
+			network: networkName
+		}: {
+			arbitratorsQuorum: number;
+			arbitrators: string[];
+			clients: string[];
+			network: NetworkNames;
+		}) {
 		const { isLiquid, network } = getNetworkByName(networkName);
 
 		return isLiquid
 			? createLiquidMultisig(clients, arbitrators, arbitratorsQuorum, network).confidentialAddress
 			: createBitcoinMultisig(
-					clients.map((pubkey) =>
-						ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
-					),
-					arbitrators.map((pubkey) =>
-						ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
-					),
-					arbitratorsQuorum,
-					network
-			  ).multisig.address!;
+				clients.map((pubkey) =>
+					ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
+				),
+				arbitrators.map((pubkey) =>
+					ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
+				),
+				arbitratorsQuorum,
+				network
+			).multisig.address!;
 	}
 
 	function exportContract(fileHash: string) {
@@ -275,72 +276,111 @@
 	}
 </script>
 
-<div class="flex justify-center items-center h-full">
-	<div class="flex flex-col gap-4 w-1/2">
+<div class="flex items-center justify-center min-h-screen w-full p-4">
+	<div class="bg-white rounded-lg shadow-lg p-8 max-w-3xl w-full">
+		<h2 class="text-2xl font-bold text-pls-blue-100 text-center mb-6">Join Contract</h2>
+
 		{#each Object.values(contractsData) as data}
-			<p>Involved clients:</p>
-			<div class="flex flex-wrap gap-4">
-				{#key contractSignatures}
-					{#each data.document.pubkeys.clients as pubkey}
-						{@const signed = isContractSignedBy(data.document.fileHash, pubkey)}
-						<div class="flex flex-col">
-							<Person {pubkey} />
+			<div class="space-y-6">
+				<div>
+					<h3 class="text-lg font-semibold text-pls-blue-100 mb-3">Involved Clients:</h3>
+					<div class="flex flex-wrap gap-4 justify-center">
+						{#key contractSignatures}
+							{#each data.document.pubkeys.clients as pubkey}
+								{@const signed = isContractSignedBy(data.document.fileHash, pubkey)}
+								<div
+									class="flex flex-col items-center p-3 rounded-lg border-2 {signed ? 'border-green-400 bg-green-50' : 'border-gray-200'}">
+									<Person {pubkey} divClass="text-pls-blue-50 font-semibold" />
+									<span
+										class="font-bold text-sm mt-1 {signed ? 'text-green-600' : 'text-gray-500'}">{signed ? 'Signed' : 'Waiting'}</span>
+								</div>
+							{/each}
+						{/key}
+					</div>
+				</div>
 
-							<span class="text-2xl">{signed ? '✅' : '🕓'}</span>
-							<span class="font-bold">{signed ? 'Signed' : 'Waiting'}</span>
+				<div>
+					<h3 class="text-lg font-semibold text-pls-blue-100 mb-3">Involved Arbitrators:</h3>
+					<div class="flex flex-wrap gap-4 justify-center">
+						{#key contractSignatures}
+							{#each data.document.pubkeys.arbitrators as pubkey}
+								{@const signed = isContractSignedBy(data.document.fileHash, pubkey)}
+								<div
+									class="flex flex-col items-center p-3 rounded-lg border-2 {signed ? 'border-green-400 bg-green-50' : 'border-gray-200'}">
+									<Person {pubkey} divClass="text-pls-blue-50 font-semibold" />
+									<span
+										class="font-bold text-sm mt-1 {signed ? 'text-green-600' : 'text-gray-500'}">{signed ? 'Signed' : 'Waiting'}</span>
+								</div>
+							{/each}
+						{/key}
+					</div>
+				</div>
+
+				<div class="border-t border-gray-200 pt-4 space-y-2">
+					<p class="text-gray-700 text-center">
+						<strong class="text-pls-blue-100">{data.collateral.arbitratorsQuorum}</strong> arbitrator(s) needs to agree
+					</p>
+					<p class="text-gray-700 text-center">
+						Network: <strong class="text-pls-blue-100">{data.collateral.network}</strong>
+					</p>
+				</div>
+
+				<div class="space-y-3 border-t border-gray-200 pt-4">
+					{#if data.document.fileHash === documentHash}
+						{#key contractSignatures}
+							<Button
+								color="none"
+								class="bg-pls-blue-100 hover:bg-pls-blue-50 text-white text-center rounded px-3 py-2 text-xl w-full transition-colors"
+								on:click={() => handleApprove(data.document.fileHash)}
+								disabled={$nostrAuth
+									? isContractSignedBy(data.document.fileHash, $nostrAuth?.pubkey)
+									: true}
+							>
+								Approve
+							</Button>
+						{/key}
+					{:else if documentHash !== undefined}
+						<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center font-semibold">
+							Contract text doesn't match!
 						</div>
-					{/each}
-				{/key}
-			</div>
-			<p>Involved arbitrators:</p>
-			<div class="flex flex-wrap gap-4">
-				{#key contractSignatures}
-					{#each data.document.pubkeys.arbitrators as pubkey}
-						{@const signed = isContractSignedBy(data.document.fileHash, pubkey)}
-						<div class="flex flex-col">
-							<Person {pubkey} />
+					{/if}
 
-							<span class="text-2xl">{signed ? '✅' : '🕓'}</span>
-							<span class="font-bold">{signed ? 'Signed' : 'Waiting'}</span>
+					{#if eventId}
+						<div class="space-y-2">
+							<p class="text-gray-700 text-center text-sm">Send this contract link to the involved parties:</p>
+							<Button color="none"
+											class="bg-pls-blue-100 hover:bg-pls-blue-50 text-white text-center rounded px-3 py-2 text-xl w-full transition-colors"
+											on:click={handleCopyContractLink}>Copy link
+							</Button>
 						</div>
-					{/each}
-				{/key}
+					{/if}
+
+					{#key contractSignatures}
+						{#if hasAllSignatures(data.document.fileHash)}
+							<Button color="none"
+											class="bg-pls-blue-100 hover:bg-pls-blue-50 text-white text-center rounded px-3 py-2 text-xl w-full transition-colors"
+											on:click={() => exportContract(data.document.fileHash)}
+							>
+								Export Agreement Proof
+							</Button>
+						{/if}
+					{/key}
+				</div>
 			</div>
-			<p>{data.collateral.arbitratorsQuorum} arbitrators need to agree</p>
-			<p>Network: {data.collateral.network}</p>
-
-			{#if data.document.fileHash === documentHash}
-				{#key contractSignatures}
-					<Button
-						on:click={() => handleApprove(data.document.fileHash)}
-						disabled={$nostrAuth
-							? isContractSignedBy(data.document.fileHash, $nostrAuth?.pubkey)
-							: true}>Approve</Button
-					>
-				{/key}
-			{:else if documentHash !== undefined}
-				<p>Contract text doesn't match!</p>
-			{/if}
-
-			{#if eventId}
-				<p class="text-center">Send this contract link to the involved parties:</p>
-				<Button on:click={handleCopyContractLink}>📋 Copy link</Button>
-			{/if}
-
-			{#key contractSignatures}
-				{#if hasAllSignatures(data.document.fileHash)}
-					<Button on:click={() => exportContract(data.document.fileHash)}>Export Agreement Proof</Button>
-				{/if}
-			{/key}
 		{:else}
-			<div class="flex justify-center">
+			<div class="text-center py-8">
 				{#if !documentFile && eventId}
-					<p>Drop contract document to have access to the contract</p>
+					<p class="text-gray-600 text-lg">Drop contract document to have access to the contract</p>
 				{:else}
-					<p>You have no pending contract requests</p>
+					<p class="text-gray-600 text-lg">No pending contract requests</p>
 				{/if}
 			</div>
 		{/each}
-		<DropDocument bind:file={documentFile} />
+
+		{#if !documentFile || Object.keys(contractsData).length === 0}
+			<div class="mt-6 border-t border-gray-200 pt-6">
+				<DropDocument bind:file={documentFile} />
+			</div>
+		{/if}
 	</div>
 </div>

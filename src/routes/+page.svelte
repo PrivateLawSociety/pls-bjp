@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { nostrAuth } from '$lib/nostr';
 	import { Button, P } from 'flowbite-svelte';
-	import { DiscordSolid, GithubSolid, YoutubeSolid, XSolid } from 'flowbite-svelte-icons';
+	import { DiscordSolid, GithubSolid, XSolid, YoutubeSolid } from 'flowbite-svelte-icons';
 </script>
 
 {#if $nostrAuth?.pubkey}
 	<div class="flex flex-col justify-center items-center h-full gap-8">
 		<div class="flex flex-col justify-center items-center gap-4">
 			<a href="/contract/create" class="w-full md:w-auto">
-				<Button class="w-48 md:w-64">Create</Button>
+				<Button class="w-48 md:w-64 bg-white text-pls-blue-100 font-bold text-lg" color="none">Create</Button>
 			</a>
 
 			<a href="/contract/verify" class="w-full md:w-auto">
-				<Button class="w-48 md:w-64">View</Button>
+				<Button class="w-48 md:w-64 bg-white text-pls-blue-100 font-bold text-lg" color="none">View</Button>
 			</a>
 
 			<!-- <a href="/settings" class="w-full md:w-auto">
@@ -28,7 +28,7 @@
 
 		<div class="w-full flex flex-col justify-center items-center h-full gap-4">
 			<a href="/start">
-				<Button class="w-48 md:w-64">Start</Button>
+				<Button class="w-48 md:w-64 bg-white text-pls-blue-100 font-bold text-lg" color="none">Start</Button>
 			</a>
 		</div>
 	</div>

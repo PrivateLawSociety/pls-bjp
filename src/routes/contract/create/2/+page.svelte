@@ -34,12 +34,25 @@
 	});
 </script>
 
-<P class="text-2xl">Select contract clients</P>
+<div class="flex items-center justify-center min-h-[calc(100vh-300px)] w-full p-4">
+	<div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
+		<h2 class="text-2xl font-bold text-pls-blue-100 text-center mb-6">Select Contract Clients</h2>
 
-<div class="flex gap-4 items-center h-full">
-	<PersonChooser people={contactsAndMe} bind:selectedPerson={clients[0]} />
-	<PersonChooser people={contactsAndMe} bind:selectedPerson={clients[1]} />
+		<div class="flex gap-4 items-center justify-center mb-6">
+			<PersonChooser people={contactsAndMe} bind:selectedPerson={clients[0]} />
+			<PersonChooser people={contactsAndMe} bind:selectedPerson={clients[1]} />
+		</div>
+
+		<div class="flex justify-center">
+			<a href="/contract/create/3" class="w-full">
+				<Button
+					color="none"
+					class="bg-red w-full text-pls-blue-100 border-2 border-pls-blue-100 hover:bg-pls-blue-50 hover:text-white transition-colors px-8 py-2"
+					disabled={!(clients[0] && clients[1])}
+				>
+					Next
+				</Button>
+			</a>
+		</div>
+	</div>
 </div>
-<a href="/contract/create/3">
-	<Button class="w-48 md:w-52" disabled={!(clients[0] && clients[1])}>Next</Button>
-</a>

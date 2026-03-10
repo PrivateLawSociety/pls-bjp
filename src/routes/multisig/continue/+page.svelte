@@ -1,15 +1,13 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import LabelledInput from '$lib/components/LabelledInput.svelte';
 	import { Psbt } from 'bitcoinjs-lib';
-	import { SpendRequestEvent, type PsbtMetadata, type SpendRequestPayload } from '../shared';
+	import { type PsbtMetadata, SpendRequestEvent, type SpendRequestPayload } from '../shared';
 	import { broadcastToNostr, nostrAuth, relayList, relayPool } from '$lib/nostr';
 	import { onMount } from 'svelte';
 	import { formatDateTime, hashFromFile } from '$lib/utils';
 	import { createMempoolApi } from '$lib/mempool';
 	import { contractDataFileStore } from '$lib/stores';
 	import FileDrop from '$lib/components/FileDrop.svelte';
-	import { Pset, address, bip341 } from 'liquidjs-lib';
+	import { address, bip341, Pset } from 'liquidjs-lib';
 	import {
 		createLiquidMultisig,
 		finalizeTxSpendingFromLiquidMultisig,
@@ -301,41 +299,112 @@
 	}
 </script>
 
-<div class="flex flex-col items-center justify-center h-screen w-full gap-4">
+<div class="flex flex-col items-center justify-center min-h-screen w-full p-4">
 	{#if !generatedPSBTsMetadata && !psbtsMetadata}
-		<h1 class="text-3xl font-bold">Continue spend from multisig</h1>
-		<LabelledInput type="text" label="PSBT hex" bind:value={psbtsMetadataStringified} />
-		<p>or</p>
-		<FileDrop dropText={'Drop PSBT here'} bind:files={psbtFiles} />
-		{#if !contractFile && !$contractDataFileStore}
-			<p>or from nostr:</p>
-			<DropDocument bind:file={contractFile} />
-		{:else}
-			<p>Waiting for a nostr event</p>
-		{/if}
+		<div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full flex flex-col items-center gap-6">
+			<h1 class="text-3xl font-bold text-pls-blue-100">Continue spend from multisig</h1>
+
+			<div class="w-full space-y-4">
+				<div>
+					<label class="block text-sm font-semibold text-gray-700 mb-2">PSBT hex</label>
+					<textarea
+						bind:value={psbtsMetadataStringified}
+						class="w-full px-3 py-2 border border-gray-300 rounded text-pls-blue-100 focus:outline-none focus:ring-2 focus:ring-pls-blue-100 min-h-[100px]"
+						placeholder="Paste PSBT hex here"
+					></textarea>
+				</div>
+
+				<div class="text-center text-gray-500 font-semibold">or</div>
+
+				<FileDrop dropText={'Drop PSBT here'} bind:files={psbtFiles} />
+
+				{#if !contractFile && !$contractDataFileStore}
+					<div class="text-center text-gray-500 font-semibold">or from nostr:</div>
+					<DropDocument bind:file={contractFile} />
+				{:else}
+					<div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+						<p class="text-center text-gray-700 font-semibold">Waiting for a nostr event...</p>
+					</div>
+				{/if}
+			</div>
+		</div>
 	{/if}
 
 	{#if generatedTransactionHex}
-		<h1 class="text-3xl">Transaction created</h1>
-		<!-- TODO: don't show this button if transaction has timelock -->
-		<Button on:click={publish}>🚀 Publish</Button>
-		<Button on:click={copyTransactionToClipboard}>📋 Copy</Button>
+		<div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full flex flex-col items-center gap-6">
+			<h1 class="text-3xl font-bold text-pls-blue-100">Transaction created</h1>
+			<p class="text-gray-700 text-center">Your transaction is ready to be published to the network</p>
+			<!-- TODO: don't show this button if transaction has timelock -->
+			<div class="flex gap-4 flex-wrap justify-center">
+				<button
+					on:click={publish}
+					class="bg-pls-blue-100 hover:bg-pls-blue-50 text-white rounded px-6 py-3 text-lg transition-colors"
+				>
+					Publish
+				</button>
+				<button
+					on:click={copyTransactionToClipboard}
+					class="bg-pls-blue-100 hover:bg-pls-blue-50 text-white rounded px-6 py-3 text-lg transition-colors"
+				>
+					Copy
+				</button>
+			</div>
+		</div>
 	{:else if generatedPSBTsMetadata}
-		<h1 class="text-3xl">PSBT created</h1>
-		<p>Send this to another party so that they can continue the spending</p>
-		<Button on:click={copyPsbtsToClipboard}>📋 Copy</Button>
-		<p>or</p>
-		<Button on:click={sendViaNostr}>Send via nostr</Button>
+		<div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full flex flex-col items-center gap-6">
+			<h1 class="text-3xl font-bold text-pls-blue-100">PSBT created</h1>
+			<p class="text-gray-700 text-center">Send this to another party so that they can continue the spending</p>
+			<div class="flex gap-4 flex-wrap justify-center">
+				<button
+					on:click={copyPsbtsToClipboard}
+					class="bg-pls-blue-100 hover:bg-pls-blue-50 text-white rounded px-6 py-3 text-lg transition-colors"
+				>
+					Copy
+				</button>
+				<button
+					on:click={sendViaNostr}
+					class="bg-pls-blue-100 hover:bg-pls-blue-50 text-white rounded px-6 py-3 text-lg transition-colors"
+				>
+					Send via nostr
+				</button>
+			</div>
+		</div>
 	{:else if userShownData}
-		<!-- it's safe to get only the first one because we already checked that all PSBTs are equivalent -->
-		{#each userShownData.outputs as output}
-			<p>{output.address} receives {output.value}</p>
-		{/each}
-		{#if userShownData.locktime !== 0}
-			<p>timelock: {formatDateTime(new Date(userShownData.locktime * 1000))}</p>
-		{/if}
-		<Button on:click={handleApproveTransaction}>Approve transaction</Button>
-	{:else if psbtsMetadataStringified != ''}
-		<p>Invalid PSBT</p>
+		<div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
+			<h1 class="text-3xl font-bold text-pls-blue-100 text-center mb-6">Review transaction</h1>
+
+			<div class="space-y-4 mb-6">
+				<h2 class="text-xl font-semibold text-gray-700">Outputs:</h2>
+				{#each userShownData.outputs as output}
+					<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+						<p class="text-sm text-gray-600 font-semibold mb-1">Address:</p>
+						<p class="break-all text-pls-blue-100 font-mono text-sm mb-3">{output.address}</p>
+						<p class="text-sm text-gray-600 font-semibold mb-1">Amount:</p>
+						<p class="text-lg font-bold text-gray-700">{output.value} sats</p>
+					</div>
+				{/each}
+
+				{#if userShownData.locktime !== 0}
+					<div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+						<p class="text-sm text-gray-600 font-semibold mb-1">Timelock:</p>
+						<p class="text-gray-700">{formatDateTime(new Date(userShownData.locktime * 1000))}</p>
+					</div>
+				{/if}
+			</div>
+
+			<div class="flex justify-center">
+				<button
+					on:click={handleApproveTransaction}
+					class="bg-pls-blue-100 hover:bg-pls-blue-50 text-white rounded px-8 py-3 text-lg font-semibold transition-colors"
+				>
+					Approve transaction
+				</button>
+			</div>
+		</div>
+	{:else if psbtsMetadataStringified.length > 0}
+		<div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center mt-2">
+			<p class="text-xl text-red-600 font-semibold">Invalid PSBT</p>
+			<p class="text-sm text-gray-500 mt-2">Please check the PSBT data and try again</p>
+		</div>
 	{/if}
 </div>

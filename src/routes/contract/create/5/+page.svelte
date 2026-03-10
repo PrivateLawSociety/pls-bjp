@@ -82,24 +82,46 @@
 	}
 </script>
 
-<P class="text-2xl">Review</P>
+<div class="flex items-center justify-center min-h-[calc(100vh-300px)] w-full p-4">
+	<div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
+		<h2 class="text-2xl font-bold text-pls-blue-100 text-center mb-6">Review</h2>
 
-<div class="flex flex-col justify-center items-center gap-2 h-full">
-	<P size="xl" weight="bold">Clients:</P>
-	{#if clients[0] || clients[1]}
-		<div class="flex gap-2">
-			<Person pubkey={clients[0] ?? ''} />
-			<Person pubkey={clients[1] ?? ''} />
+		<div class="flex flex-col justify-center items-center gap-4 mb-6">
+			<P color="none" size="xl" weight="bold" class="text-pls-blue-100">Clients:</P>
+			{#if clients[0] || clients[1]}
+				<div class="flex gap-2">
+					<Person pubkey={clients[0] ?? ''} divClass="text-pls-blue-50 font-semibold" />
+					<Person pubkey={clients[1] ?? ''} divClass="text-pls-blue-50 font-semibold" />
+				</div>
+			{/if}
+			<P color="none" size="xl" weight="bold" class="text-pls-blue-100 mt-2">Arbitrators:</P>
+			<div class="flex gap-2 flex-wrap justify-center">
+				{#each arbitrators as arbitrator}
+					<Person pubkey={arbitrator ?? ''} divClass="text-pls-blue-50 font-semibold" />
+				{/each}
+			</div>
+			<P color="none" size="lg" class="text-pls-blue-100 font-bold mt-2">
+				Arbitrators quorum:
+				<span class="text-gray-700 font-normal">{arbitratorsQuorum}</span>
+			</P>
+			<P color="none" size="lg" class="text-pls-blue-100 font-bold">
+				Network:
+				<span class="text-gray-700 font-normal">{network}</span>
+			</P>
+			<P color="none" size="lg" class="text-pls-blue-100 font-bold">
+				File:
+				<span class="text-gray-700 font-normal">{documentName}</span>
+			</P>
 		</div>
-	{/if}
-	<P size="xl" weight="bold">Arbitrators:</P>
-	<div class="flex gap-2 flex-wrap justify-center">
-		{#each arbitrators as arbitrator}
-			<Person pubkey={arbitrator ?? ''} />
-		{/each}
+
+		<div class="flex justify-center">
+			<Button
+				color="none"
+				class="bg-white w-full text-pls-blue-100 border-2 border-pls-blue-100 hover:bg-pls-blue-50 hover:text-white transition-colors px-8 py-2"
+				on:click={requestSignatures}
+			>
+				Create
+			</Button>
+		</div>
 	</div>
-	<P size="xl">Arbitrators quorum: <strong>{arbitratorsQuorum}</strong></P>
-	<P size="xl">Network: <strong>{network}</strong></P>
-	<P size="xl">File: <strong>{documentName}</strong></P>
 </div>
-<Button class="w-48 md:w-52" on:click={requestSignatures}>Create</Button>
