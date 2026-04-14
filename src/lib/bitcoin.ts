@@ -13,13 +13,19 @@ bitcoin.initEccLib(ecc);
 export function tweakPublicKey(pubkey: Buffer, tweak: Buffer) {
 	const xOnlyPubkey = toXOnly(pubkey);
 
-	const tweakedPubkey = ecc.xOnlyPointAddTweak(xOnlyPubkey, tweak);
+	const tweakedPubkey = ecc.xOnlyPointAddTweak(
+		xOnlyPubkey as unknown as Uint8Array,
+		tweak as unknown as Uint8Array
+	);
 
 	if (!tweakedPubkey) throw new Error('Cannot tweak public key');
 
 	const parityByte = Buffer.from([tweakedPubkey.parity ? 0x02 : 0x03]);
 
-	return Buffer.concat([parityByte, Buffer.from(tweakedPubkey.xOnlyPubkey)]);
+	return Buffer.concat([
+		parityByte as unknown as Uint8Array,
+		Buffer.from(tweakedPubkey.xOnlyPubkey) as unknown as Uint8Array
+	]);
 }
 
 export const networkNames = ['bitcoin', 'bitcoin_testnet', 'liquid', 'liquid_testnet'] as const;
@@ -32,16 +38,16 @@ export function isValidNetworkName(name: string): name is NetworkNames {
 
 export function getNetworkByName(networkName: NetworkNames): { isTestnet: boolean } & (
 	| {
-	isLiquid: false;
-	network: bitcoin.networks.Network;
-	name: 'bitcoin' | 'bitcoin_testnet';
-}
+			isLiquid: false;
+			network: bitcoin.networks.Network;
+			name: 'bitcoin' | 'bitcoin_testnet';
+	  }
 	| {
-	isLiquid: true;
-	network: liquid.networks.Network;
-	name: 'liquid' | 'liquid_testnet';
-}
-	) {
+			isLiquid: true;
+			network: liquid.networks.Network;
+			name: 'liquid' | 'liquid_testnet';
+	  }
+) {
 	if (networkName === 'bitcoin')
 		return {
 			isLiquid: false,

@@ -2,7 +2,12 @@ import { tweakPublicKey } from '$lib/bitcoin';
 import type { ECPairInterface } from 'ecpair';
 import { hashFromJSON } from 'pls-core';
 
-import { type Contract, contractSchema, type UnsignedContract, unsignedContractSchema } from 'pls-full';
+import {
+	type Contract,
+	contractSchema,
+	type UnsignedContract,
+	unsignedContractSchema
+} from 'pls-full';
 
 export function tryParseFinishedContract(stringifiedContract: string) {
 	try {

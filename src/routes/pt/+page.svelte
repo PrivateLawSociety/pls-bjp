@@ -1,7 +1,7 @@
 <script lang="ts">
+	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Card from '$lib/components/Card.svelte';
-	import Badge from '$lib/components/Badge.svelte';
 	import CopyButton from '$lib/components/CopyButton.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
 
@@ -19,21 +19,21 @@
 	}[] = [
 		{
 			name: 'Marcus',
-			role: 'Development',
+			role: 'Desenvolvimento',
 			platform: 'github',
 			href: 'https://github.com/marcusmmmz',
 			avatar: '/avatars/marcus.png'
 		},
 		{
 			name: 'Daniel',
-			role: 'General',
+			role: 'Geral',
 			platform: 'x',
 			href: 'https://x.com/DanielSmithPLS',
 			avatar: '/avatars/daniel.jpg'
 		},
 		{
 			name: 'Paipe',
-			role: 'General',
+			role: 'Geral',
 			platform: 'x',
 			href: 'https://x.com/raspaipe',
 			avatar: '/avatars/paipe.jpg'
@@ -47,7 +47,7 @@
 		},
 		{
 			name: 'TheMhv',
-			role: 'Development',
+			role: 'Desenvolvimento',
 			platform: 'nostr',
 			href: 'https://primal.net/p/nprofile1qqsxgsc2fmunxj5k7p65pr4ryvgedms8x7qt3mj00h9aal90dhnaw2g7d6qyt',
 			avatar: '/avatars/themhv.png'
@@ -61,42 +61,42 @@
 		},
 		{
 			name: 'Theus',
-			role: 'General',
+			role: 'Geral',
 			platform: 'nostr',
 			href: 'https://primal.net/p/npub1ejlc0kr3k4qk88d2zm4gv930jqct8sdemnwnq7jsayjgggw9a9sqss54s4',
 			avatar: '/avatars/theus.png'
 		},
 		{
 			name: 'Rogerio',
-			role: 'Development',
+			role: 'Desenvolvimento',
 			platform: 'x',
 			href: 'https://x.com/RogerioRbf',
 			avatar: '/avatars/rogerio.jpg'
 		},
 		{
 			name: 'Weasel',
-			role: 'Development',
+			role: 'Desenvolvimento',
 			platform: 'github',
 			href: 'https://github.com/LuizPreve',
 			avatar: '/avatars/weasel.png'
 		},
 		{
 			name: 'Calango',
-			role: 'Development',
+			role: 'Desenvolvimento',
 			platform: 'nostr',
 			href: 'https://primal.net/p/nprofile1qqsqhzzdphtjcdl7pka550zz90uv6ce0kz7u00j3wj09gkjyn2aa2js5lvaqw',
 			avatar: '/avatars/calango.png'
 		},
 		{
 			name: 'Wick',
-			role: 'Development',
+			role: 'Desenvolvimento',
 			platform: 'x',
 			href: 'https://x.com/GaltWick',
 			avatar: '/avatars/wick.jpg'
 		},
 		{
 			name: 'Owltz',
-			role: 'Development',
+			role: 'Desenvolvimento',
 			platform: 'github',
 			href: 'https://github.com/owltz',
 			avatar: '/avatars/owltz.png'
@@ -104,7 +104,6 @@
 	];
 </script>
 
-<!-- HERO -->
 <section class="relative overflow-hidden">
 	<div
 		class="absolute inset-0 bg-cover bg-center"
@@ -117,24 +116,24 @@
 	></div>
 
 	<div
-		class="relative mx-auto flex max-w-5xl flex-col items-center gap-6 px-4 pt-20 pb-24 md:px-8 md:pt-28 md:pb-32 text-center"
+		class="relative mx-auto flex max-w-5xl flex-col items-center gap-6 px-4 pb-32 pt-20 text-center md:px-8 md:pb-32 md:pt-28"
 	>
-		<Badge variant="neutral" size="md">A network of contracts, arbitration & reputation</Badge>
+		<Badge variant="neutral" size="md">Uma rede de contratos, arbitragem e reputação</Badge>
 
 		<h1
-			class="max-w-4xl text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight text-[rgb(var(--text))]"
+			class="max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[rgb(var(--text))] md:text-6xl lg:text-7xl"
 		>
 			Private Law <span class="text-gradient-brand">Society</span>
 		</h1>
 
-		<p class="max-w-2xl text-base md:text-lg text-[rgb(var(--text-muted))]">
-			The Private Law Society is a decentralized system of justice, a network of contracts,
-			arbitration, and reputation without governments.
+		<p class="max-w-2xl text-base text-[rgb(var(--text-muted))] md:text-lg">
+			A Private Law Society é um sistema descentralizado de justiça, uma rede de contratos,
+			arbitragem e reputação sem governos.
 		</p>
 
 		<div class="flex flex-wrap items-center justify-center gap-3 pt-2">
-			<Button href="/bjp" variant="primary" size="lg">
-				Make a contract
+			<Button href="/pt/bjp" variant="primary" size="lg">
+				Criar contrato
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					width="16"
@@ -150,29 +149,28 @@
 					<polyline points="12 5 19 12 12 19" />
 				</svg>
 			</Button>
-			<Button href="/wot" variant="outline" size="lg">Verify users' reliability</Button>
-			<Button href="/manifesto" variant="ghost" size="lg">Read the manifesto</Button>
+			<Button href="/pt/wot" variant="outline" size="lg">Verificar confiabilidade</Button>
+			<Button href="/pt/manifesto" variant="ghost" size="lg">Ler o manifesto</Button>
 		</div>
 	</div>
 </section>
 
-<!-- ABOUT -->
 <section class="border-t border-[rgb(var(--border))]">
-	<div class="mx-auto w-full max-w-4xl px-4 md:px-8 py-20 md:py-24">
+	<div class="mx-auto w-full max-w-4xl px-4 py-20 md:px-8 md:py-24">
 		<div class="mb-10 text-center">
-			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-pls-blue-400">About</p>
-			<h2 class="mt-2 text-3xl md:text-4xl font-extrabold tracking-tight text-[rgb(var(--text))]">
-				About PLS
+			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-pls-blue-400">Sobre</p>
+			<h2 class="mt-2 text-3xl font-extrabold tracking-tight text-[rgb(var(--text))] md:text-4xl">
+				Sobre a PLS
 			</h2>
 		</div>
 
 		<Card
-			class="flex flex-col gap-6 text-[rgb(var(--text-muted))] text-base md:text-lg leading-relaxed"
+			class="flex flex-col gap-6 text-base leading-relaxed text-[rgb(var(--text-muted))] md:text-lg"
 		>
 			<p>
-				The Private Law Society is a project that aims to build a decentralized justice system for a
-				post-state world. It replaces the coercive monopoly of the state with cryptography,
-				voluntary participation, and reputation.
+				A Private Law Society é um projeto que busca construir um sistema descentralizado de justiça
+				para um mundo pós-Estado. Ela substitui o monopólio coercitivo do Estado por criptografia,
+				participação voluntária e reputação.
 			</p>
 
 			<blockquote class="border-l-4 border-pls-blue-500 pl-5 italic text-[rgb(var(--text))]">
@@ -184,38 +182,39 @@
 			</blockquote>
 
 			<p>
-				PLS combines contracts, arbitration, and distributed trust. Disputes are resolved through
-				pre-chosen arbitrators — backed by Bitcoin-based collateral or by reputation mechanisms — so
-				that enforcement doesn't depend on any central authority.
+				A PLS combina contratos, arbitragem e confiança distribuída. Disputas são resolvidas por
+				árbitros escolhidos previamente, respaldados por garantias em Bitcoin ou por mecanismos de
+				reputação, de modo que a execução não dependa de nenhuma autoridade central.
 			</p>
 
 			<p>
-				Two core protocols make this possible:
+				Dois protocolos centrais tornam isso possível:
 				<strong class="text-[rgb(var(--text))]">Bitcoin Justice Protocol (BJP)</strong>
-				enables voluntary contracts secured with Bitcoin collateral and human arbitrators, while
+				permite contratos voluntários assegurados por garantias em Bitcoin e árbitros humanos, enquanto
 				<strong class="text-[rgb(var(--text))]">Web of Trust (WoT)</strong>
-				builds Nostr-based reputation through social endorsements.
+				constrói reputação baseada no Nostr por meio de endossos sociais.
 			</p>
 
 			<div class="flex flex-wrap gap-3 pt-2">
-				<Button href="/bjp" variant="outline">About BJP</Button>
-				<Button href="/wot" variant="outline">About WoT</Button>
-				<Button href="/manifesto" variant="outline">Read Manifesto</Button>
+				<Button href="/pt/bjp" variant="outline">Sobre o BJP</Button>
+				<Button href="/pt/wot" variant="outline">Sobre o WoT</Button>
+				<Button href="/pt/manifesto" variant="outline">Ler manifesto</Button>
 			</div>
 		</Card>
 	</div>
 </section>
 
-<!-- VOLUNTEER TEAM -->
 <section class="border-t border-[rgb(var(--border))]">
-	<div class="mx-auto w-full max-w-6xl px-4 md:px-8 py-20 md:py-24">
+	<div class="mx-auto w-full max-w-6xl px-4 py-20 md:px-8 md:py-24">
 		<div class="mb-12 text-center">
-			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-pls-blue-400">Contributors</p>
-			<h2 class="mt-2 text-3xl md:text-4xl font-extrabold tracking-tight text-[rgb(var(--text))]">
-				Volunteer Team
+			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-pls-blue-400">
+				Contribuidores
+			</p>
+			<h2 class="mt-2 text-3xl font-extrabold tracking-tight text-[rgb(var(--text))] md:text-4xl">
+				Equipe voluntária
 			</h2>
 			<p class="mt-3 text-sm text-[rgb(var(--text-muted))]">
-				The people building PLS in their free time.
+				As pessoas que constroem a PLS no tempo livre.
 			</p>
 		</div>
 
@@ -250,11 +249,10 @@
 									height="16"
 									viewBox="0 0 24 24"
 									fill="currentColor"
-								>
-									<path
+									><path
 										d="M12 .5C5.73.5.75 5.48.75 11.75c0 4.96 3.2 9.17 7.64 10.66.56.1.76-.25.76-.55 0-.27-.01-1.17-.02-2.12-3.11.68-3.77-1.32-3.77-1.32-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.68.08-.68 1.13.08 1.72 1.16 1.72 1.16 1 1.72 2.63 1.22 3.27.93.1-.73.39-1.22.71-1.5-2.48-.28-5.09-1.24-5.09-5.53 0-1.22.44-2.22 1.16-3-.12-.29-.5-1.44.11-3 0 0 .94-.3 3.09 1.15.9-.25 1.86-.38 2.82-.38s1.92.13 2.82.38c2.15-1.45 3.09-1.15 3.09-1.15.62 1.56.23 2.71.11 3 .72.78 1.16 1.78 1.16 3 0 4.3-2.61 5.24-5.1 5.52.4.34.76 1.02.76 2.05 0 1.48-.01 2.68-.01 3.05 0 .3.2.65.77.54 4.43-1.48 7.63-5.7 7.63-10.65C23.25 5.48 18.27.5 12 .5z"
-									/>
-								</svg>
+									/></svg
+								>
 							{:else if member.platform === 'x'}
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -262,11 +260,10 @@
 									height="14"
 									viewBox="0 0 24 24"
 									fill="currentColor"
-								>
-									<path
+									><path
 										d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-									/>
-								</svg>
+									/></svg
+								>
 							{:else}
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -278,11 +275,12 @@
 									stroke-width="2.2"
 									stroke-linecap="round"
 									stroke-linejoin="round"
+									><path d="M4 4l16 16" /><path d="M20 4L4 20" /><circle
+										cx="12"
+										cy="12"
+										r="3"
+									/></svg
 								>
-									<path d="M4 4l16 16" />
-									<path d="M20 4L4 20" />
-									<circle cx="12" cy="12" r="3" />
-								</svg>
 							{/if}
 						</a>
 					</div>
@@ -292,16 +290,15 @@
 	</div>
 </section>
 
-<!-- CONTRIBUTE -->
 <section class="border-t border-[rgb(var(--border))]">
-	<div class="mx-auto w-full max-w-5xl px-4 md:px-8 py-20 md:py-24">
+	<div class="mx-auto w-full max-w-5xl px-4 py-20 md:px-8 md:py-24">
 		<div class="mb-12 text-center">
-			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-pls-blue-400">Contribute</p>
-			<h2 class="mt-2 text-3xl md:text-4xl font-extrabold tracking-tight text-[rgb(var(--text))]">
-				How to contribute
+			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-pls-blue-400">Contribua</p>
+			<h2 class="mt-2 text-3xl font-extrabold tracking-tight text-[rgb(var(--text))] md:text-4xl">
+				Como contribuir
 			</h2>
 			<p class="mt-3 text-sm text-[rgb(var(--text-muted))]">
-				Support PLS with sats, code, or word of mouth.
+				Apoie a PLS com sats, código ou divulgação.
 			</p>
 		</div>
 
@@ -321,13 +318,12 @@
 							stroke-width="2"
 							stroke-linecap="round"
 							stroke-linejoin="round"
+							><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg
 						>
-							<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-						</svg>
 					</div>
 					<div>
 						<h3 class="font-semibold text-[rgb(var(--text))]">Bitcoin</h3>
-						<p class="text-xs text-[rgb(var(--text-muted))]">On-chain donation</p>
+						<p class="text-xs text-[rgb(var(--text-muted))]">Doação on-chain</p>
 					</div>
 				</div>
 				<div
@@ -353,13 +349,12 @@
 							stroke-width="2"
 							stroke-linecap="round"
 							stroke-linejoin="round"
+							><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg
 						>
-							<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-						</svg>
 					</div>
 					<div>
 						<h3 class="font-semibold text-[rgb(var(--text))]">Lightning</h3>
-						<p class="text-xs text-[rgb(var(--text-muted))]">Lightning address</p>
+						<p class="text-xs text-[rgb(var(--text-muted))]">Endereço Lightning</p>
 					</div>
 				</div>
 				<div
@@ -383,15 +378,14 @@
 							height="18"
 							viewBox="0 0 24 24"
 							fill="currentColor"
-						>
-							<path
+							><path
 								d="M12 .5C5.73.5.75 5.48.75 11.75c0 4.96 3.2 9.17 7.64 10.66.56.1.76-.25.76-.55 0-.27-.01-1.17-.02-2.12-3.11.68-3.77-1.32-3.77-1.32-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.68.08-.68 1.13.08 1.72 1.16 1.72 1.16 1 1.72 2.63 1.22 3.27.93.1-.73.39-1.22.71-1.5-2.48-.28-5.09-1.24-5.09-5.53 0-1.22.44-2.22 1.16-3-.12-.29-.5-1.44.11-3 0 0 .94-.3 3.09 1.15.9-.25 1.86-.38 2.82-.38s1.92.13 2.82.38c2.15-1.45 3.09-1.15 3.09-1.15.62 1.56.23 2.71.11 3 .72.78 1.16 1.78 1.16 3 0 4.3-2.61 5.24-5.1 5.52.4.34.76 1.02.76 2.05 0 1.48-.01 2.68-.01 3.05 0 .3.2.65.77.54 4.43-1.48 7.63-5.7 7.63-10.65C23.25 5.48 18.27.5 12 .5z"
-							/>
-						</svg>
+							/></svg
+						>
 					</div>
 					<div>
-						<h3 class="font-semibold text-[rgb(var(--text))]">Code</h3>
-						<p class="text-xs text-[rgb(var(--text-muted))]">Open source contributions</p>
+						<h3 class="font-semibold text-[rgb(var(--text))]">Código</h3>
+						<p class="text-xs text-[rgb(var(--text-muted))]">Contribuições open source</p>
 					</div>
 				</div>
 				<Button href="https://github.com/PrivateLawSociety/" variant="outline" fullWidth>
@@ -414,19 +408,18 @@
 							stroke-width="2"
 							stroke-linecap="round"
 							stroke-linejoin="round"
-						>
-							<path
+							><path
 								d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-							/>
-						</svg>
+							/></svg
+						>
 					</div>
 					<div>
-						<h3 class="font-semibold text-[rgb(var(--text))]">Join the project</h3>
-						<p class="text-xs text-[rgb(var(--text-muted))]">Discord community</p>
+						<h3 class="font-semibold text-[rgb(var(--text))]">Entre no projeto</h3>
+						<p class="text-xs text-[rgb(var(--text-muted))]">Comunidade no Discord</p>
 					</div>
 				</div>
 				<Button href="https://discord.gg/PNE3PZTUNz" variant="outline" fullWidth>
-					Join the PLS Discord ↗
+					Entrar no Discord da PLS ↗
 				</Button>
 			</Card>
 		</div>
@@ -435,11 +428,11 @@
 			<div>
 				<h3 class="font-semibold text-[rgb(var(--text))]">Newsletter</h3>
 				<p class="text-sm text-[rgb(var(--text-muted))]">
-					Get updates on PLS, BJP, and WoT directly in your inbox.
+					Receba atualizações sobre PLS, BJP e WoT diretamente no seu e-mail.
 				</p>
 			</div>
 			<Button href="mailto:privatelawsociety.net@gmail.com?subject=Newsletter" variant="primary">
-				Subscribe
+				Inscrever-se
 			</Button>
 		</Card>
 	</div>
