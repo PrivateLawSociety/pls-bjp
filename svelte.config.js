@@ -1,27 +1,29 @@
 import adapter from '@sveltejs/adapter-vercel';
-import { vitePreprocess } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+
+// pls-lib package aliases live in vite.config.ts (resolve.alias) instead of
+// kit.alias. That keeps the runtime alias without generating tsconfig paths,
+// so the ambient declarations in src/pls-lib-ambient.d.ts can type-check
+// these modules as `any` and prevent svelte-check from following third-party
+// source files we can't modify.
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	preprocess: [vitePreprocess({})],
-
 	kit: {
-		alias: {
-			// I hate this but it works so I don't care
-			'pls-bitcoin': './node_modules/pls-lib/packages/pls-bitcoin/index',
-			'pls-core': './node_modules/pls-lib/packages/pls-core/index',
-			'pls-full': './node_modules/pls-lib/packages/pls-full/index',
-			'pls-liquid': './node_modules/pls-lib/packages/pls-liquid/index',
-			'pls-nostr': './node_modules/pls-lib/packages/pls-nostr'
-
-			// If you want to use pls-lib locally
-			// 'pls-bitcoin': '../pls-lib/packages/pls-bitcoin',
-			// 'pls-core': '../pls-lib/packages/pls-core',
-			// 'pls-full': '../pls-lib/packages/pls-full',
-			// 'pls-liquid': '../pls-lib/packages/pls-liquid',
-			// 'pls-nostr': '../pls-lib/packages/pls-nostr'
-		},
-		adapter: adapter({ runtime: 'nodejs20.x' })
+		adapter: adapter({ runtime: 'nodejs22.x' }),
+		prerender: {
+			// /wot is added in a later phase; /bjp routes are client-only (ssr=false).
+			// When prerendering /, the crawler may follow links to those routes and
+			// get 404s because they don't render on the server — ignore them instead
+			// of failing the build.
+			handleHttpError: ({ status, path, message }) => {
+				if (status === 404 && (path.startsWith('/wot') || path.startsWith('/bjp'))) {
+					return;
+				}
+				throw new Error(message);
+			}
+		}
 	}
 };
 

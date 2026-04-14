@@ -1,9 +1,197 @@
-/* Write your global styles here, in PostCSS syntax */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-body {
-    @apply bg-pls-bg text-white;
+/* Enable `.dark` class-based dark variant (Tailwind 4 requires explicit setup). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	--font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+	/* Flowbite-svelte reads `primary.*` — mirror PLS blue so its components inherit the brand. */
+	--color-primary-50: #eef3fc;
+	--color-primary-100: #d8e3f8;
+	--color-primary-200: #b0c7f0;
+	--color-primary-300: #89abe9;
+	--color-primary-400: #618fe1;
+	--color-primary-500: #4373d1;
+	--color-primary-600: #3560b8;
+	--color-primary-700: #2a4d94;
+	--color-primary-800: #1f3a70;
+	--color-primary-900: #14274c;
+
+	--color-pls-blue-50: #eef3fc;
+	--color-pls-blue-100: #d8e3f8;
+	--color-pls-blue-200: #b0c7f0;
+	--color-pls-blue-300: #89abe9;
+	--color-pls-blue-400: #618fe1;
+	--color-pls-blue-500: #4373d1;
+	--color-pls-blue-600: #3560b8;
+	--color-pls-blue-700: #2a4d94;
+	--color-pls-blue-800: #1f3a70;
+	--color-pls-blue-900: #14274c;
+
+	--color-pls-accent-400: #8b5cf6;
+	--color-pls-accent-500: #7c3aed;
+	--color-pls-accent-600: #6d28d9;
+
+	--color-pls-ink-500: #303856;
+	--color-pls-ink-600: #252c44;
+	--color-pls-ink-700: #1b2236;
+	--color-pls-ink-800: #111827;
+	--color-pls-ink-900: #0a0a0f;
+	--color-pls-ink-950: #07070b;
+
+	--shadow-glow: 0 10px 40px -12px rgba(67, 115, 209, 0.45);
+	--shadow-glow-lg: 0 20px 60px -20px rgba(124, 58, 237, 0.35);
+	--shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.08);
+
+	--radius-xl: 0.875rem;
+	--radius-2xl: 1.125rem;
+	--radius-3xl: 1.5rem;
 }
 
+@layer base {
+	:root {
+		--bg: 250 250 247;
+		--bg-muted: 244 244 240;
+		--surface: 255 255 255;
+		--surface-2: 248 249 253;
+		--border: 226 232 240;
+		--border-strong: 203 213 225;
+		--text: 11 16 32;
+		--text-muted: 71 85 105;
+		--text-faint: 100 116 139;
+		--accent: 67 115 209;
+		--accent-strong: 53 96 184;
+		--accent-contrast: 255 255 255;
+		--ring: 67 115 209;
+		--success: 16 185 129;
+		--warning: 234 179 8;
+		--danger: 239 68 68;
+		--radial-start: rgba(67, 115, 209, 0.08);
+		--radial-end: rgba(124, 58, 237, 0.02);
+	}
+
+	html.dark {
+		--bg: 10 10 15;
+		--bg-muted: 17 24 39;
+		--surface: 255 255 255 / 0.04;
+		--surface-2: 255 255 255 / 0.07;
+		--border: 255 255 255 / 0.08;
+		--border-strong: 255 255 255 / 0.16;
+		--text: 244 244 246;
+		--text-muted: 161 170 195;
+		--text-faint: 126 134 158;
+		--accent: 97 143 225;
+		--accent-strong: 67 115 209;
+		--accent-contrast: 255 255 255;
+		--ring: 139 92 246;
+		--success: 52 211 153;
+		--warning: 250 204 21;
+		--danger: 248 113 113;
+		--radial-start: rgba(97, 143, 225, 0.22);
+		--radial-end: rgba(124, 58, 237, 0.12);
+	}
+
+	html {
+		font-family: var(--font-sans);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-rendering: optimizeLegibility;
+	}
+
+	body {
+		color: rgb(var(--text));
+		background-color: rgb(var(--bg));
+		background-image: radial-gradient(
+			60% 55% at 50% 0%,
+			var(--radial-start) 0%,
+			var(--radial-end) 45%,
+			transparent 80%
+		);
+		background-attachment: fixed;
+		min-height: 100vh;
+	}
+
+	::selection {
+		background-color: rgb(var(--accent) / 0.35);
+		color: rgb(var(--text));
+	}
+
+	:focus-visible {
+		outline: 2px solid rgb(var(--ring));
+		outline-offset: 2px;
+	}
+
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: rgb(var(--border-strong)) transparent;
+	}
+	*::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	*::-webkit-scrollbar-thumb {
+		background: rgb(var(--border-strong));
+		border-radius: 999px;
+	}
+}
+
+@layer components {
+	.surface {
+		background-color: rgb(var(--surface));
+		border: 1px solid rgb(var(--border));
+	}
+
+	.surface-2 {
+		background-color: rgb(var(--surface-2));
+		border: 1px solid rgb(var(--border));
+	}
+
+	.glass {
+		background-color: rgb(var(--surface));
+		border: 1px solid rgb(var(--border));
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+	}
+
+	.text-muted {
+		color: rgb(var(--text-muted));
+	}
+
+	.text-faint {
+		color: rgb(var(--text-faint));
+	}
+
+	.text-accent {
+		color: rgb(var(--accent));
+	}
+
+	.bg-accent {
+		background-color: rgb(var(--accent));
+	}
+
+	.border-themed {
+		border-color: rgb(var(--border));
+	}
+
+	.border-themed-strong {
+		border-color: rgb(var(--border-strong));
+	}
+
+	.ring-accent {
+		--tw-ring-color: rgb(var(--accent));
+	}
+
+	.bg-gradient-brand {
+		background-image: linear-gradient(135deg, #4373d1 0%, #7c3aed 100%);
+	}
+
+	.text-gradient-brand {
+		background-image: linear-gradient(135deg, #618fe1 0%, #a78bfa 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+}

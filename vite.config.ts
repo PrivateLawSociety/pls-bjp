@@ -1,12 +1,42 @@
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
+import { resolve } from 'node:path';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
 
+// pls-lib subpackage aliases live here (not in svelte.config.js kit.alias) so
+// that svelte-kit does not leak tsconfig `paths` that would cause svelte-check
+// to follow third-party .ts sources. Type checking uses the ambient module
+// declarations in src/pls-lib-ambient.d.ts instead.
+const plsLibRoot = resolve('./node_modules/pls-lib/packages');
+
 export default defineConfig({
-	plugins: [wasm(), topLevelAwait(), nodePolyfills(), sveltekit()],
+	plugins: [
+		tailwindcss(),
+		wasm(),
+		topLevelAwait(),
+		nodePolyfills({
+			include: ['buffer', 'crypto', 'events', 'process', 'stream', 'util', 'module'],
+			globals: {
+				Buffer: true,
+				global: true,
+				process: true
+			},
+			protocolImports: true
+		}),
+		sveltekit()
+	],
+	resolve: {
+		alias: {
+			'pls-bitcoin': `${plsLibRoot}/pls-bitcoin/index`,
+			'pls-core': `${plsLibRoot}/pls-core/index`,
+			'pls-full': `${plsLibRoot}/pls-full/index`,
+			'pls-liquid': `${plsLibRoot}/pls-liquid/index`,
+			'pls-nostr': `${plsLibRoot}/pls-nostr`
+		}
+	},
 	optimizeDeps: {
 		include: [
 			'liquidjs-lib',
@@ -27,19 +57,13 @@ export default defineConfig({
 			'liquidjs-lib/src/asset'
 		],
 		esbuildOptions: {
-			// Node.js global to browser globalThis
 			define: {
 				global: 'globalThis'
-			},
-			// Enable esbuild polyfill plugins
-			plugins: [
-				NodeGlobalsPolyfillPlugin({
-					buffer: true
-				})
-			]
+			}
 		}
 	},
 	build: {
+		target: 'es2022',
 		rollupOptions: {
 			external: ['@vulpemventures/secp256k1-zkp']
 		}
