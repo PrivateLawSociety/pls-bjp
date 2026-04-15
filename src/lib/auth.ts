@@ -108,6 +108,12 @@ export const nostrAuth = {
 		const pubkey = getPublicKey(Uint8Array.from(Buffer.from(privkey, 'hex')));
 		store.set({ privkey, pubkey });
 	},
+	/** Register an extension-backed identity (NIP-07). The extension holds
+	 * the private key; we only keep the pubkey in memory so signing goes
+	 * through window.nostr.signEvent / signSchnorr on demand. */
+	loginWithPubkey(pubkey: string) {
+		store.set({ pubkey });
+	},
 	getPrivkey() {
 		return get(store)?.privkey;
 	},

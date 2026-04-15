@@ -4,23 +4,30 @@
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import { onMount } from 'svelte';
 
 	import { page } from '$app/state';
 
 	const npub = page.url.searchParams.get('npub');
 	const urlParams = npub ? `?npub=${npub}` : '';
 
+	let hasNostr = false;
+
+	onMount(() => {
+		hasNostr = !!(window as any).nostr;
+	});
+
 	async function useAlby() {
 		try {
-			await window.nostr!.getPublicKey();
-
-			await nostrAuth.tryLogin();
+			const pubkey = await window.nostr!.getPublicKey();
+			nostrAuth.loginWithPubkey(pubkey);
 
 			if (npub) {
-				return goto(`/wot/rate${urlParams}`);
+				await goto(`/wot/rate${urlParams}`);
+				return;
 			}
 
-			goto('/wot');
+			await goto('/wot');
 		} catch (error) {
 			alert("You haven't allowed Alby to connect with the app");
 		}
@@ -38,7 +45,7 @@
 		</p>
 	</div>
 
-	<div class={`grid w-full max-w-4xl gap-4 ${window.nostr ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+	<div class={`grid w-full max-w-4xl gap-4 ${hasNostr ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
 		<a href={`/wot/login/new${urlParams}`} class="group block">
 			<Card
 				class="flex h-full flex-col gap-3 transition-all group-hover:border-pls-blue-400 group-hover:shadow-glow"
@@ -132,7 +139,7 @@
 			</Card>
 		</a>
 
-		{#if window.nostr}
+		{#if hasNostr}
 			<button on:click={useAlby} class="group block text-left">
 				<Card
 					class="flex h-full flex-col gap-3 transition-all group-hover:border-pls-blue-400 group-hover:shadow-glow"

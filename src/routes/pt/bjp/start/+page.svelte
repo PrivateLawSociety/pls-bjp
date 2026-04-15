@@ -12,9 +12,9 @@
 
 	async function useAlby() {
 		try {
-			await window.nostr!.getPublicKey();
-			nostrAuth.tryLogin();
-			goto('/pt');
+			const pubkey = await window.nostr!.getPublicKey();
+			nostrAuth.loginWithPubkey(pubkey);
+			await goto('/pt');
 		} catch (error) {
 			alert('Você não autorizou o Alby a conectar com o app');
 		}
