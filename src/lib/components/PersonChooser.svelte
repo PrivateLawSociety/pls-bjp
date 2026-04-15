@@ -4,19 +4,22 @@
 	import { createEventDispatcher } from 'svelte';
 	import Person from './Person.svelte';
 	import { Dropdown, Search } from 'flowbite-svelte';
-	import { UserAddSolid, UserRemoveSolid, UserSolid } from 'flowbite-svelte-icons';
+	import { UserAddSolid, UserRemoveSolid } from 'flowbite-svelte-icons';
 </script>
 
 <script lang="ts">
+	import { page } from '$app/stores';
 	export let selectedPerson: string | null = null;
 	export let people: string[];
-
 	export let placeholderName = 'Unselected';
 
 	const dispatch = createEventDispatcher();
 
 	let isDropdownOpen = false;
 	let searchTerm = '';
+	$: isPortuguese = $page.url.pathname === '/pt' || $page.url.pathname.startsWith('/pt/');
+	$: effectivePlaceholder =
+		placeholderName === 'Unselected' && isPortuguese ? 'Não selecionado' : placeholderName;
 
 	function selectPerson(pubkey: string | null) {
 		selectedPerson = pubkey;
@@ -26,11 +29,12 @@
 	}
 
 	async function selectFromPubkey() {
-		const result = prompt('What is the person\'s pubkey or npub?');
+		const result = prompt(
+			isPortuguese ? 'Qual é a pubkey ou npub da pessoa?' : "What is the person's pubkey or npub?"
+		);
 
 		if (result) {
 			let pubkey = result.startsWith('npub') ? nip19.decode(result).data.toString() : result;
-
 			selectPerson(pubkey);
 		}
 	}
@@ -38,71 +42,101 @@
 	$: filteredPeople = people.filter((pubkey) =>
 		$peopleMetadata[pubkey]?.name?.toLowerCase().includes(searchTerm.toLowerCase())
 	);
-
-	let iconSize = '' as 'xl';
 </script>
 
-<button class="w-20 hover:opacity-80 transition-opacity">
+<button
+	type="button"
+	class="group flex w-24 flex-col items-center gap-2 rounded-2xl border border-dashed border-[rgb(var(--border-strong))] bg-[rgb(var(--surface-2))] p-3 transition-all hover:border-pls-blue-400 hover:bg-[rgb(var(--surface))]"
+>
 	{#if selectedPerson}
-		<Person pubkey={selectedPerson} divClass="text-pls-blue-50 font-semibold"/>
+		<Person pubkey={selectedPerson} />
 	{:else}
-		<UserSolid size={iconSize} class="text-pls-blue-100" />
-		<p class="text-pls-blue-100 font-medium">{placeholderName}</p>
+		<div
+			class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--surface))] ring-1 ring-[rgb(var(--border))] text-[rgb(var(--text-faint))] group-hover:text-pls-blue-400"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="22"
+				height="22"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<line x1="12" y1="5" x2="12" y2="19" />
+				<line x1="5" y1="12" x2="19" y2="12" />
+			</svg>
+		</div>
+		<p class="text-[11px] font-medium text-[rgb(var(--text-faint))] group-hover:text-pls-blue-400">
+			{effectivePlaceholder}
+		</p>
 	{/if}
 </button>
 
 <Dropdown
-	bind:open={isDropdownOpen}
-	color="none"
-	class="!p-0 overflow-hidden text-sm w-64 bg-white shadow-lg border border-pls-blue-100 rounded-lg"
+	bind:isOpen={isDropdownOpen}
+	class="!p-0 w-64 overflow-hidden rounded-2xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] text-sm backdrop-blur-xl shadow-glow-lg"
 >
-	<div class="p-2 bg-white border-b border-gray-200">
+	<div class="border-b border-[rgb(var(--border))] p-2">
 		<Search
 			size="md"
 			bind:value={searchTerm}
 			color="none"
-			class="border border-pls-blue-100 text-pls-blue-50 font-semibold focus:ring-pls-blue-50"
+			class="!bg-[rgb(var(--surface-2))] !text-[rgb(var(--text))] border border-[rgb(var(--border))] focus:!ring-pls-blue-500/25 placeholder:!text-[rgb(var(--text-faint))]"
 		/>
 	</div>
-	<div class="overflow-y-auto max-h-44">
+	<div class="max-h-48 overflow-y-auto">
 		{#if filteredPeople.length === 0}
-			<p class="px-3 py-2 text-gray-500 text-center">No results found.</p>
+			<p class="px-3 py-3 text-center text-xs text-[rgb(var(--text-faint))]">
+				{isPortuguese ? 'Nenhum resultado encontrado.' : 'No results found.'}
+			</p>
 		{:else}
 			{#each filteredPeople as pubkey (pubkey)}
 				<button
-					class="flex items-center px-3 py-2 hover:bg-pls-blue-50 hover:text-white w-full transition-colors text-pls-blue-100"
+					type="button"
+					class="flex w-full items-center gap-3 border-b border-[rgb(var(--border))] px-3 py-2 text-left text-[rgb(var(--text))] transition-colors last:border-0 hover:bg-[rgb(var(--surface-2))]"
 					on:click={() => selectPerson(pubkey)}
 					title={nip19.npubEncode(pubkey)}
 				>
-					<img
-						src={$peopleMetadata[pubkey]?.picture}
-						alt={$peopleMetadata[pubkey]?.name}
-						class="w-10 h-10 rounded-full mr-3 object-cover border-2 border-gray-200"
-					/>
-					<span class="break-all line-clamp-2 font-medium text-left">{$peopleMetadata[pubkey]?.name}</span>
+					{#if $peopleMetadata[pubkey]?.picture}
+						<img
+							src={$peopleMetadata[pubkey]?.picture}
+							alt={$peopleMetadata[pubkey]?.name}
+							class="h-9 w-9 rounded-xl object-cover ring-1 ring-[rgb(var(--border-strong))]"
+						/>
+					{:else}
+						<div
+							class="flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--surface-2))] text-[rgb(var(--text-faint))] ring-1 ring-[rgb(var(--border))]"
+						>
+							?
+						</div>
+					{/if}
+					<span class="line-clamp-2 break-all text-sm font-medium">
+						{$peopleMetadata[pubkey]?.name ?? (isPortuguese ? 'Desconhecido' : 'Unknown')}
+					</span>
 				</button>
 			{/each}
 		{/if}
 	</div>
-	<div
-		class="flex border-t border-gray-200"
-		class:justify-between={selectedPerson !== null}
-	>
+	<div class="flex border-t border-[rgb(var(--border))]">
 		<button
-			class="flex items-center px-3 py-2.5 text-sm font-medium text-pls-blue-100 bg-white hover:bg-pls-blue-50 hover:text-white transition-colors flex-1 justify-center"
+			type="button"
+			class="flex flex-1 items-center justify-center gap-2 px-3 py-2.5 text-xs font-semibold text-pls-blue-400 transition-colors hover:bg-[rgb(var(--surface-2))]"
 			on:click={selectFromPubkey}
 		>
-			<UserAddSolid class="w-4 h-4 me-2" />
-			Add by ID
+			<UserAddSolid class="h-4 w-4" />
+			{isPortuguese ? 'Adicionar por ID' : 'Add by ID'}
 		</button>
-
 		{#if selectedPerson}
 			<button
-				class="flex items-center px-3 py-2.5 text-sm font-medium text-red-600 bg-white hover:bg-red-50 transition-colors flex-1 justify-center border-l border-gray-200"
+				type="button"
+				class="flex flex-1 items-center justify-center gap-2 border-l border-[rgb(var(--border))] px-3 py-2.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/10"
 				on:click={() => selectPerson(null)}
 			>
-				<UserRemoveSolid class="w-4 h-4 me-2" />
-				Remove
+				<UserRemoveSolid class="h-4 w-4" />
+				{isPortuguese ? 'Remover' : 'Remove'}
 			</button>
 		{/if}
 	</div>
