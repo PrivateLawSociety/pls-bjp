@@ -5,45 +5,41 @@
 
 	export let pubkey: string;
 
-	let iconSize = '' as 'xl';
-
 	$: username = $peopleMetadata[pubkey]?.name ?? 'No name';
+	$: npub = nip19.npubEncode(pubkey);
 
 	$: peopleMetadata.fetchPerson(pubkey);
 </script>
 
-<div class="flex flex-col justify-center items-center">
-	<div class="flex items-center gap-4 px-2">
-		{#if $peopleMetadata[pubkey]}
-			<a href="/keys" class="cursor-pointer">
-				<img
-					src={$peopleMetadata[pubkey]?.picture}
-					alt={username}
-					title={nip19.npubEncode(pubkey)}
-					class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
-				/>
-			</a>
+<a
+	href="/bjp/keys"
+	title={npub}
+	class="flex items-center gap-3 rounded-xl border border-transparent px-2 py-1.5 transition-all hover:border-[rgb(var(--border))] hover:bg-[rgb(var(--surface-2))]"
+>
+	<div class="relative">
+		{#if $peopleMetadata[pubkey]?.picture}
+			<img
+				src={$peopleMetadata[pubkey]?.picture}
+				alt={username}
+				class="h-9 w-9 rounded-xl object-cover ring-1 ring-[rgb(var(--border-strong))]"
+			/>
 		{:else}
-			<a href="/keys" class="cursor-pointer">
-				<div class="w-10 hover:opacity-80 transition-opacity">
-					<UserSolid size={iconSize} />
-				</div>
-			</a>
-		{/if}
-
-		<div class="font-medium text-pls-blue-100">
-			<div>{username || ''}</div>
-			<div class="group relative">
-				<span class="block max-w-24 text-sm text-pls-blue-50">
-					{`${nip19.npubEncode(pubkey).slice(0, 5)}...${nip19.npubEncode(pubkey).slice(-5)}`}
-				</span>
-
-				<span
-					class="absolute right-0 top-full z-10 hidden whitespace-nowrap rounded-md border border-white bg-gray-800 p-2 text-sm text-white group-hover:block"
-				>
-					{nip19.npubEncode(pubkey)}
-				</span>
+			<div
+				class="flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--surface-2))] ring-1 ring-[rgb(var(--border-strong))] text-[rgb(var(--text-muted))]"
+			>
+				<UserSolid size="sm" />
 			</div>
-		</div>
+		{/if}
+		<span
+			class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[rgb(var(--bg))]"
+		></span>
 	</div>
-</div>
+	<div class="hidden sm:flex flex-col min-w-0">
+		<span class="truncate max-w-[10rem] text-sm font-semibold text-[rgb(var(--text))]">
+			{username}
+		</span>
+		<span class="font-mono text-[11px] text-[rgb(var(--text-faint))]">
+			{`${npub.slice(0, 8)}…${npub.slice(-6)}`}
+		</span>
+	</div>
+</a>

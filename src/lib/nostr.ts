@@ -1,7 +1,12 @@
-import { type Event, finalizeEvent, generateSecretKey, getPublicKey, nip04, SimplePool } from 'nostr-tools';
-import { get, writable } from 'svelte/store';
+import { type Event, finalizeEvent, nip04, SimplePool } from 'nostr-tools';
 import { ECPair, getNetworkByName, type NetworkNames } from './bitcoin';
 import { Buffer } from 'buffer';
+import { nostrAuth } from './auth';
+
+// Auth state lives in $lib/auth so it can be imported from the SSR-safe
+// root +layout.svelte without pulling in bitcoinjs. This re-export keeps
+// existing call sites working.
+export { nostrAuth };
 
 export const relayPool = new SimplePool();
 
@@ -71,135 +76,36 @@ export function nostrEncryptDmFactory(privkey: string | undefined) {
 	};
 }
 
-export let nostrAuth = (() => {
-	let initialPrivateKey = sessionStorage.getItem('private-key');
+// getSigner returns a bitcoinjs-lib-compatible signer using either the
+// in-memory private key or a NIP-07 browser extension. It lives here
+// instead of on nostrAuth itself because it depends on bitcoinjs — and
+// nostrAuth has to stay SSR-safe (see $lib/auth).
+export function getSigner(networkName: NetworkNames) {
+	const pubkey = nostrAuth.getPubkey();
+	const privkey = nostrAuth.getPrivkey();
 
-	const store = writable<{ privkey?: string; pubkey: string } | null>(
-		initialPrivateKey
-			? {
-				privkey: initialPrivateKey,
-				pubkey: getPublicKey(Uint8Array.from(Buffer.from(initialPrivateKey, 'hex')))
-			}
-			: null
-	);
-
-	store.subscribe((keys) => {
-		if (keys?.privkey) sessionStorage.setItem('private-key', keys.privkey);
-	});
-
-	function loginWithRandomKeys() {
-		const privkey = generateSecretKey();
-		const privkeyStr = Buffer.from(privkey).toString('hex');
-		const pubkey = getPublicKey(privkey);
-
-		navigator.clipboard.writeText(
-			`private key: ${privkey}
-public key: ${pubkey}`
-		);
-
-		alert(
-			'Using a nostr extension such as getalby.com is recommended, but a keypair was copied to your clipboard so you can try out PLS without it'
-		);
-
-		store.set({
-			privkey: privkeyStr,
-			pubkey
+	if (privkey) {
+		return ECPair.fromPrivateKey(Buffer.from(privkey, 'hex'), {
+			network: getNetworkByName(networkName).network
 		});
-
-		return true;
 	}
 
-	return {
-		signOut() {
-			store.set(null);
-			sessionStorage.removeItem('private-key');
-		},
-		loginWithRandomKeys,
-		loginWithPrivkey(privkey: string) {
-			const pubkey = getPublicKey(Uint8Array.from(Buffer.from(privkey, 'hex')));
+	if (pubkey) {
+		if (!window.nostr?.signSchnorr) {
+			alert("Your extension doesn't support signing");
+			return undefined;
+		}
 
-			store.set({
-				privkey,
-				pubkey
-			});
-		},
-		getPrivkey() {
-			return get(store)?.privkey;
-		},
-		async tryLogin() {
-			if (get(store)?.pubkey) return true;
-
-			if (window.nostr) {
-				try {
-					const pubkey: string = await window.nostr.getPublicKey();
-
-					store.set({ pubkey });
-
-					return true;
-				} catch (error) {
-					return loginWithRandomKeys();
-				}
-			} else {
-				return loginWithRandomKeys();
+		return {
+			publicKey: Buffer.from('02' + pubkey, 'hex'),
+			sign() {
+				throw new Error('Signing without schnorr is not possible with the extension');
+			},
+			async signSchnorr(hash: Buffer) {
+				return Buffer.from(await window.nostr!.signSchnorr(hash.toString('hex')), 'hex');
 			}
-		},
-		async encryptDM(otherPubkey: string, text: string) {
-			const privkey = get(store)?.privkey;
+		};
+	}
 
-			const encryptDm = nostrEncryptDmFactory(privkey);
-
-			return encryptDm.encryptDM(otherPubkey, text);
-		},
-		async decryptDM(otherPubkey: string, text: string) {
-			const privkey = get(store)?.privkey;
-
-			const decryptDm = nostrEncryptDmFactory(privkey);
-
-			return decryptDm.decryptDM(otherPubkey, text);
-		},
-		async makeEvent(kind: number, content: string, tags: string[][]) {
-			const { pubkey, privkey } = get(store)!;
-
-			if (privkey) {
-				return makeNostrEvent(privkey, kind, content, tags);
-			} else {
-				const blankEvent = {
-					kind,
-					content,
-					created_at: nostrNowBasic(),
-					tags,
-					pubkey
-				} as Event;
-
-				// blankEvent.id = getEventHash(blankEvent);
-
-				return window.nostr!.signEvent(blankEvent);
-			}
-		},
-		getSigner(networkName: NetworkNames) {
-			const { pubkey, privkey } = get(store)!;
-
-			if (privkey) {
-				const ecpair = ECPair.fromPrivateKey(Buffer.from(privkey, 'hex'), {
-					network: getNetworkByName(networkName).network
-				});
-
-				return ecpair;
-			} else if (pubkey) {
-				if (!window.nostr?.signSchnorr)
-					return alert('Your extension doesn\'t support signing') as undefined;
-
-				return {
-					publicKey: Buffer.from('02' + pubkey, 'hex'),
-					sign() {
-						throw new Error('Signing without schnorr is not possible with the extension');
-					},
-					async signSchnorr(hash: Buffer) {
-						return Buffer.from(await window.nostr!.signSchnorr(hash.toString('hex')), 'hex');
-					}
-				};
-			}
-		},
-		subscribe: store.subscribe
-	};
-})();
+	return undefined;
+}

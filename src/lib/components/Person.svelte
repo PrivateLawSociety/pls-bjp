@@ -7,28 +7,33 @@
 	export let hideName = false;
 	export let divClass = '';
 
-	let iconSize = '' as 'xl';
-
 	$: username = $peopleMetadata[pubkey]?.name ?? 'No name';
 
 	$: peopleMetadata.fetchPerson(pubkey);
 </script>
 
-<div class="flex flex-col justify-center items-center {divClass}">
-	{#if $peopleMetadata[pubkey]}
+<div class={`flex flex-col items-center gap-2 ${divClass}`}>
+	{#if $peopleMetadata[pubkey]?.picture}
 		<img
 			src={$peopleMetadata[pubkey]?.picture}
 			alt={username}
 			title={nip19.npubEncode(pubkey)}
-			class="w-20 h-20 rounded-full object-cover"
+			class="h-16 w-16 rounded-2xl object-cover ring-1 ring-[rgb(var(--border-strong))]"
 		/>
 	{:else}
-		<div class="w-20 border border-gray-500 rounded-full flex items-center justify-center">
-			<UserSolid fill="gray" size={iconSize} />
+		<div
+			class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--surface-2))] ring-1 ring-[rgb(var(--border-strong))] text-[rgb(var(--text-faint))]"
+		>
+			<UserSolid size="md" />
 		</div>
 	{/if}
 
 	{#if !hideName}
-		<p title={username} class="text-center w-20 line-clamp-2 break-words">{username}</p>
+		<p
+			title={username}
+			class="line-clamp-2 w-20 break-words text-center text-xs font-medium text-[rgb(var(--text))]"
+		>
+			{username}
+		</p>
 	{/if}
 </div>

@@ -13,3 +13,8 @@ vite.config.ts.timestamp-*
 # IDE
 .idea/
 .vscode/
+
+# Playwright MCP screenshots and console logs
+.playwright-mcp/
+tmp-*.png
+.gstack/

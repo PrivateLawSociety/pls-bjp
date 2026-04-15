@@ -1,12 +1,33 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-	<meta charset="utf-8" />
-	<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
-	<meta name="viewport" content="width=device-width" />
-	%sveltekit.head%
-</head>
-<body data-sveltekit-preload-data="hover">
-<div style="display: contents">%sveltekit.body%</div>
-</body>
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="color-scheme" content="dark light" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+			rel="stylesheet"
+		/>
+
+		<script>
+			(function () {
+				try {
+					if (localStorage.getItem('pls-theme') === 'light')
+						document.documentElement.classList.remove('dark');
+					else document.documentElement.classList.add('dark');
+				} catch (e) {
+					document.documentElement.classList.add('dark');
+				}
+			})();
+		</script>
+
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
 </html>

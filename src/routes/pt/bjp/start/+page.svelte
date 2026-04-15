@@ -1,0 +1,124 @@
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { nostrAuth } from '$lib/nostr';
+	import { onMount } from 'svelte';
+	import Card from '$lib/components/Card.svelte';
+
+	let hasNostr = false;
+
+	onMount(() => {
+		hasNostr = !!(window as any).nostr;
+	});
+
+	async function useAlby() {
+		try {
+			const pubkey = await window.nostr!.getPublicKey();
+			nostrAuth.loginWithPubkey(pubkey);
+			await goto('/pt');
+		} catch (error) {
+			alert('Você não autorizou o Alby a conectar com o app');
+		}
+	}
+</script>
+
+<div class="mx-auto flex w-full max-w-3xl flex-col items-center gap-10 py-8">
+	<div class="text-center">
+		<h1 class="text-3xl font-extrabold tracking-tight text-[rgb(var(--text))] md:text-4xl">
+			Identidade PLS
+		</h1>
+		<p class="mt-2 text-sm text-[rgb(var(--text-muted))]">
+			Escolha como começar. Suas chaves ficam neste navegador.
+		</p>
+	</div>
+
+	<div class={`grid w-full gap-4 ${hasNostr ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+		<a href="/pt/bjp/start/new" class="group block">
+			<Card
+				class="flex h-full flex-col gap-3 transition-all group-hover:border-pls-blue-400 group-hover:shadow-glow"
+			>
+				<div
+					class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-brand text-white shadow-glow"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="22"
+						height="22"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<line x1="12" y1="5" x2="12" y2="19" />
+						<line x1="5" y1="12" x2="19" y2="12" />
+					</svg>
+				</div>
+				<h2 class="text-lg font-bold text-[rgb(var(--text))]">Nova</h2>
+				<p class="text-sm text-[rgb(var(--text-muted))]">
+					Gere uma identidade Nostr nova. Você controla a chave secreta.
+				</p>
+			</Card>
+		</a>
+
+		<a href="/pt/bjp/start/import" class="group block">
+			<Card
+				class="flex h-full flex-col gap-3 transition-all group-hover:border-pls-blue-400 group-hover:shadow-glow"
+			>
+				<div
+					class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgb(var(--surface-2))] text-pls-blue-400 ring-1 ring-[rgb(var(--border-strong))]"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="22"
+						height="22"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+						<polyline points="7 10 12 15 17 10" />
+						<line x1="12" y1="15" x2="12" y2="3" />
+					</svg>
+				</div>
+				<h2 class="text-lg font-bold text-[rgb(var(--text))]">Importar / Recuperar</h2>
+				<p class="text-sm text-[rgb(var(--text-muted))]">
+					Cole seu `nsec` existente para restaurar sua identidade.
+				</p>
+			</Card>
+		</a>
+
+		{#if hasNostr}
+			<button on:click={useAlby} class="group block text-left">
+				<Card
+					class="flex h-full flex-col gap-3 transition-all group-hover:border-pls-blue-400 group-hover:shadow-glow"
+				>
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/30"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="22"
+							height="22"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+						</svg>
+					</div>
+					<h2 class="text-lg font-bold text-[rgb(var(--text))]">Usar Alby</h2>
+					<p class="text-sm text-[rgb(var(--text-muted))]">
+						Conecte sua extensão Nostr do navegador (NIP-07).
+					</p>
+				</Card>
+			</button>
+		{/if}
+	</div>
+</div>
