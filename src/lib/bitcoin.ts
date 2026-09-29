@@ -26,6 +26,18 @@ export const networkNames = ['bitcoin', 'bitcoin_testnet', 'liquid', 'liquid_tes
 
 export type NetworkNames = (typeof networkNames)[number];
 
+// Invalid point, there is not priv key to sign this, should be random.
+// It's being maintained for compatibility purposes
+// Should be removed in future pls-bitcoin-lib versions or at least optional
+export const internalPubkey = Uint8Array.from(Buffer.from(
+	"0250929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0",
+	"hex"
+));
+
+export const multisigNetworks = ['bitcoin', 'testnet'] as const;
+
+export type MultisigNetwork = (typeof multisigNetworks)[number];
+
 export function isValidNetworkName(name: string): name is NetworkNames {
 	return networkNames.includes(name as NetworkNames);
 }
@@ -72,4 +84,19 @@ export function getNetworkByName(networkName: NetworkNames): { isTestnet: boolea
 		};
 
 	throw new Error('It should be impossible to get here');
+}
+
+export function getMultisigNetworkByNetworkName(networkName: NetworkNames): MultisigNetwork {
+	const networks: { [key in NetworkNames]?: MultisigNetwork } = {
+		bitcoin: 'bitcoin',
+		bitcoin_testnet: 'testnet',
+	};
+
+	const network = networks[networkName];
+
+	if (network === undefined) {
+		throw new Error('Invalid network for bitcoin multisig: ${networkName}');
+	}
+
+	return network;
 }

@@ -306,8 +306,9 @@
 
 			<div class="w-full space-y-4">
 				<div>
-					<label class="block text-sm font-semibold text-gray-700 mb-2">PSBT hex</label>
+					<label for="psbt-metadata" class="block text-sm font-semibold text-gray-700 mb-2">PSBT hex</label>
 					<textarea
+						id="psbt-metadata"
 						bind:value={psbtsMetadataStringified}
 						class="w-full px-3 py-2 border border-gray-300 rounded text-pls-blue-100 focus:outline-none focus:ring-2 focus:ring-pls-blue-100 min-h-[100px]"
 						placeholder="Paste PSBT hex here"

@@ -46,6 +46,7 @@
     "flowbite-svelte-icons": "^1.5.0",
     "liquidjs-lib": "6.0.2-liquid.32",
     "nostr-tools": "^2.7.1",
+    "pls-bitcoin-lib": "^0.4.1",
     "pls-lib": "github:PrivateLawSociety/pls-lib",
     "qrcode-generator": "^1.4.4",
     "tailwind-merge": "^2.2.2",

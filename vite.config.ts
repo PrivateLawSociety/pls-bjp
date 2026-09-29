@@ -24,8 +24,9 @@ export default defineConfig({
 			'liquidjs-lib/src/transaction',
 			'liquidjs-lib/src/value',
 			'liquidjs-lib/src/issuance',
-			'liquidjs-lib/src/asset'
+			'liquidjs-lib/src/asset',
 		],
+		exclude: ['pls-bitcoin-lib'],
 		esbuildOptions: {
 			// Node.js global to browser globalThis
 			define: {
@@ -35,7 +36,7 @@ export default defineConfig({
 			plugins: [
 				NodeGlobalsPolyfillPlugin({
 					buffer: true
-				})
+				}),
 			]
 		}
 	},
@@ -43,5 +44,5 @@ export default defineConfig({
 		rollupOptions: {
 			external: ['@vulpemventures/secp256k1-zkp']
 		}
-	}
+	},
 });

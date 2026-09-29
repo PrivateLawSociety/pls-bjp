@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createBitcoinMultisig, startTxSpendingFromMultisig } from 'pls-bitcoin';
+	import multisigGen, { LockTime } from "pls-bitcoin-lib";
 	import { tryParseFinishedContract } from '$lib/pls/contract';
 	import type { Contract } from 'pls-full';
 	import { type PsbtMetadata, SpendRequestEvent, type SpendRequestPayload } from '../shared';
@@ -7,10 +7,12 @@
 	import { onMount } from 'svelte';
 	import { hashFromFile } from '$lib/utils';
 	import { createMempoolApi, type UTXO } from '$lib/mempool';
-	import { ECPair, getNetworkByName } from '$lib/bitcoin';
+	import { internalPubkey, getMultisigNetworkByNetworkName, getNetworkByName } from '$lib/bitcoin';
 	import { contractDataFileStore } from '$lib/stores';
 	import { createLiquidMultisig, getUnblindedUtxoValue, startSpendFromLiquidMultisig } from 'pls-liquid';
 	import DropContract from '$lib/components/DropContract.svelte';
+	import { Buffer } from 'buffer';
+	import { Psbt } from 'bitcoinjs-lib';
 
 	let utxos: (UTXO & { hex?: string })[] | null = null;
 
@@ -167,59 +169,64 @@
 					network,
 					signer,
 					addresses.filter(({ address }) => address.trim() !== '')
-					// timelockDays ? unixNow + oneDayInSeconds * timelockDays : undefined
 				);
 				if (!psbt) return alert('couldn\'t generate PSETs');
 
 				generatedPSBTsMetadata = [
 					...generatedPSBTsMetadata,
 					{
-						redeemOutput,
 						psbtHex: psbt.toBuffer().toString('hex'),
 						pubkeys: script.combination
 					}
 				];
 			}
 		} else {
-			const { multisig, multisigScripts } = createBitcoinMultisig(
-				contractData.collateral.pubkeys.clients.map((pubkey) =>
-					ECPair.fromPublicKey(Buffer.from('02' + pubkey, 'hex'), { network: network })
-				),
-				contractData.collateral.pubkeys.arbitrators.map((pubkey) =>
-					ECPair.fromPublicKey(Buffer.from('02' + pubkey, 'hex'), { network: network })
-				),
-				contractData.collateral.arbitratorsQuorum,
-				network
-			);
+			const multisig = multisigGen.createMultisig({
+				parts: contractData.collateral.pubkeys.clients.map((pubkey) => Uint8Array.from(Buffer.from('02' + pubkey, 'hex'))),
+				arbitrators: contractData.collateral.pubkeys.arbitrators.map((pubkey) => Uint8Array.from(Buffer.from('02' + pubkey, 'hex'))),
+				quorum: contractData.collateral.arbitratorsQuorum,
+				internalPubkey,
+				network: getMultisigNetworkByNetworkName(contractData.collateral.network),
+			});
 
-			const possibleScripts = multisigScripts.filter(({ combination }) =>
-				combination.some((ecpair) => ecpair.publicKey.toString('hex') === '02' + pubkey)
+			const possibleScripts = multisig.scripts().filter(({ combination }) =>
+				combination.some((publicKey) => Buffer.from(publicKey).toString('hex') === '02' + pubkey)
 			);
 
 			generatedPSBTsMetadata = [];
 
+			const unixNow = Math.floor(Date.now() / 1000);
+
+			const oneDayInSeconds = 60 * 60 * 24;
+
 			for (const script of possibleScripts) {
-				const redeemOutput = script.leaf.output.toString('hex');
+				const redeemScript = script.leaf;
 
-				const unixNow = Math.floor(Date.now() / 1000);
-				const oneDayInSeconds = 60 * 60 * 24;
+				const lockTime = timelockDays ? LockTime.Timestamp(unixNow + oneDayInSeconds * timelockDays) : undefined;
 
-				const psbt = await startTxSpendingFromMultisig(
-					multisig,
-					redeemOutput,
-					signer,
-					network,
-					addresses.filter(({ address }) => address.trim() !== ''),
-					utxos,
-					timelockDays ? unixNow + oneDayInSeconds * timelockDays : undefined
-				);
+				const rawPsbt = multisig.startTxSpending({
+					redeemScript,
+					utxos: utxos.map((utxo) => ({
+						txid: Uint8Array.from(Buffer.from(utxo.txid, 'hex')),
+						vout: utxo.vout,
+						value: BigInt(utxo.value)
+					})),
+					outs: addresses.filter(({ address }) => address.trim() !== '').map(({ address, value }) => ({
+						address,
+						value: BigInt(value),
+					})),
+					lockTime,
+				});
+
+				const psbt = Psbt.fromBuffer(Buffer.from(rawPsbt));
+
+				await psbt.signAllInputsAsync(signer);
 
 				generatedPSBTsMetadata = [
 					...generatedPSBTsMetadata,
 					{
-						redeemOutput,
 						psbtHex: psbt.toHex(),
-						pubkeys: script.combination.map((ecpair) => ecpair.publicKey.toString('hex'))
+						pubkeys: script.combination.map((publicKey) => Buffer.from(publicKey).toString('hex'))
 					}
 				];
 			}
@@ -302,10 +309,20 @@
 								</button>
 							{:else}
 								<div class="bg-gray-50 rounded-lg p-4 border border-gray-200 w-full max-w-md">
-									<label class="block text-sm font-semibold text-gray-700 mb-2">
-										Days until the timelock's unlocked
-									</label>
+									<div class="flex justify-between items-top mb-2">
+										<label for="timelock-days" class="text-sm font-semibold text-gray-700 mb-2">
+											Days until the timelock's unlocked
+										</label>
+										<button
+											on:click={() => timelockDays = undefined}
+											class="text-red-500 hover:text-red-700 transition-colors font-bold text-sm mb-3"
+											title="Remove timelock"
+										>
+											x
+										</button>
+									</div>
 									<input
+										id="timelock-days"
 										type="number"
 										bind:value={timelockDays}
 										class="w-full px-3 py-2 border border-gray-300 rounded text-pls-blue-100 focus:outline-none focus:ring-2 focus:ring-pls-blue-100"
@@ -329,7 +346,7 @@
 
 						<div class="max-h-96 overflow-y-auto space-y-4 pr-2">
 							{#each addresses as addr, i (addr.id)}
-								<div class="bg-gray-50 rounded-lg p-4 border border-2 border-pls-blue-50 relative">
+								<div class="bg-gray-50 rounded-lg p-4 border-2 border-pls-blue-50 relative">
 									<div class="flex flex-col gap-3">
 										<div class="flex justify-between items-center mb-2">
 											<span class="text-sm font-semibold text-gray-600">Address #{i + 1}</span>
@@ -344,10 +361,11 @@
 											{/if}
 										</div>
 										<div>
-											<label class="block text-sm font-medium text-gray-700 mb-1">
+											<label for="address" class="block text-sm font-medium text-gray-700 mb-1">
 												Receiving address
 											</label>
 											<input
+												id="address"
 												type="text"
 												bind:value={addr.address}
 												class="w-full px-3 py-2 border border-gray-300 rounded text-pls-blue-100 focus:outline-none focus:ring-2 focus:ring-pls-blue-100"
@@ -355,10 +373,11 @@
 											/>
 										</div>
 										<div>
-											<label class="block text-sm font-medium text-gray-700 mb-1">
+											<label for="amount" class="block text-sm font-medium text-gray-700 mb-1">
 												Amount (sats)
 											</label>
 											<input
+												id="amount"
 												type="number"
 												bind:value={addr.value}
 												class="w-full px-3 py-2 border border-gray-300 rounded text-pls-blue-100 focus:outline-none focus:ring-2 focus:ring-pls-blue-100"

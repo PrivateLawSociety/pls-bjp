@@ -7,6 +7,7 @@
 		relayPool
 	} from '$lib/nostr';
 	import { onDestroy, onMount } from 'svelte';
+	import multisigGen from "pls-bitcoin-lib";
 	import {
 		ContractRequestEvent,
 		ContractApprovalEvent,
@@ -19,8 +20,7 @@
 	import { tweakContractPubkey, signContract } from '$lib/pls/contract';
 	import Person from '$lib/components/Person.svelte';
 	import { downloadBlob, hashFromFile } from '$lib/utils';
-	import { createBitcoinMultisig } from 'pls-bitcoin';
-	import { ECPair, getNetworkByName, type NetworkNames } from '$lib/bitcoin';
+	import { getMultisigNetworkByNetworkName, getNetworkByName, type NetworkNames, internalPubkey } from '$lib/bitcoin';
 	import { createLiquidMultisig } from 'pls-liquid';
 	import DropDocument from '$lib/components/DropDocument.svelte';
 	import { page } from '$app/stores';
@@ -243,18 +243,19 @@
 		}) {
 		const { isLiquid, network } = getNetworkByName(networkName);
 
-		return isLiquid
-			? createLiquidMultisig(clients, arbitrators, arbitratorsQuorum, network).confidentialAddress
-			: createBitcoinMultisig(
-				clients.map((pubkey) =>
-					ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
-				),
-				arbitrators.map((pubkey) =>
-					ECPair.fromPublicKey(Buffer.from('02' + pubkey.slice(-64), 'hex'))
-				),
-				arbitratorsQuorum,
-				network
-			).multisig.address!;
+		if (isLiquid) {
+			return  createLiquidMultisig(clients, arbitrators, arbitratorsQuorum, network).confidentialAddress;
+		}
+
+		const multisig = multisigGen.createMultisig({
+			parts: clients.map((pubkey) => Uint8Array.from(Buffer.from('02' + pubkey.slice(-64), 'hex'))),
+			arbitrators: arbitrators.map((pubkey) => Uint8Array.from(Buffer.from('02' + pubkey.slice(-64), 'hex'))),
+			quorum: arbitratorsQuorum,
+			network: getMultisigNetworkByNetworkName(networkName),
+			internalPubkey
+		});
+
+		return multisig.address();
 	}
 
 	function exportContract(fileHash: string) {
