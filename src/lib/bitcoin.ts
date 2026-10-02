@@ -30,7 +30,7 @@ export type NetworkNames = (typeof networkNames)[number];
 // It's being maintained for compatibility purposes
 // Should be removed in future pls-bitcoin-lib versions or at least optional
 export const internalPubkey = Uint8Array.from(Buffer.from(
-	"0250929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0",
+	"50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0",
 	"hex"
 ));
 

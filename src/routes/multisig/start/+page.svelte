@@ -182,8 +182,8 @@
 			}
 		} else {
 			const multisig = multisigGen.createMultisig({
-				parts: contractData.collateral.pubkeys.clients.map((pubkey) => Uint8Array.from(Buffer.from('02' + pubkey, 'hex'))),
-				arbitrators: contractData.collateral.pubkeys.arbitrators.map((pubkey) => Uint8Array.from(Buffer.from('02' + pubkey, 'hex'))),
+				parts: contractData.collateral.pubkeys.clients.map((pubkey) => Uint8Array.from(Buffer.from(pubkey, 'hex'))),
+				arbitrators: contractData.collateral.pubkeys.arbitrators.map((pubkey) => Uint8Array.from(Buffer.from(pubkey, 'hex'))),
 				quorum: contractData.collateral.arbitratorsQuorum,
 				internalPubkey,
 				network: getMultisigNetworkByNetworkName(contractData.collateral.network),
