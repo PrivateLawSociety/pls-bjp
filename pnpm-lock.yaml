@@ -39,8 +39,8 @@ importers:
         specifier: ^2.7.1
         version: 2.7.1(typescript@5.2.2)
       pls-bitcoin-lib:
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.5.1
+        version: 0.5.1
       pls-lib:
         specifier: github:PrivateLawSociety/pls-lib
         version: https://codeload.github.com/PrivateLawSociety/pls-lib/tar.gz/5d7e963f0c64cb67afc7d61e1a6f92fa40b6cb4c
@@ -1451,8 +1451,8 @@ packages:
     resolution: {integrity: sha512-NPE8TDbzl/3YQYY7CSS228s3g2ollTFnc+Qi3tqmqJp9Vg2ovUpixcJEo2HJScN2Ez+kEaal6y70c0ehqJBJeA==}
     engines: {node: '>=10'}
 
-  pls-bitcoin-lib@0.5.0:
-    resolution: {integrity: sha512-KQ4nEsxAngdDGarn8FBXhI4YTwGNN+7DyMXMPKrwaLsj6Kh4LOh6ABeB6ha6aukYAhSo42blLJl5QXHdD0i9WA==}
+  pls-bitcoin-lib@0.5.1:
+    resolution: {integrity: sha512-qMWClGz8iew7U4YZ6+rHev9WAhPYh2kLBcdWWAU2/ieHSxx5kT3TurcUbRbUVfzTxY9udQ4bXXjimsEaATttWg==}
 
   pls-lib@https://codeload.github.com/PrivateLawSociety/pls-lib/tar.gz/5d7e963f0c64cb67afc7d61e1a6f92fa40b6cb4c:
     resolution: {tarball: https://codeload.github.com/PrivateLawSociety/pls-lib/tar.gz/5d7e963f0c64cb67afc7d61e1a6f92fa40b6cb4c}
@@ -3282,7 +3282,7 @@ snapshots:
     dependencies:
       find-up: 5.0.0
 
-  pls-bitcoin-lib@0.5.0: {}
+  pls-bitcoin-lib@0.5.1: {}
 
   pls-lib@https://codeload.github.com/PrivateLawSociety/pls-lib/tar.gz/5d7e963f0c64cb67afc7d61e1a6f92fa40b6cb4c: {}
 
