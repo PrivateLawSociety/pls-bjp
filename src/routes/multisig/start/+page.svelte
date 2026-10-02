@@ -190,7 +190,7 @@
 			});
 
 			const possibleScripts = multisig.scripts().filter(({ combination }) =>
-				combination.some((publicKey) => Buffer.from(publicKey).toString('hex') === '02' + pubkey)
+				combination.some((publicKey) => Buffer.from(publicKey).toString('hex') === pubkey)
 			);
 
 			generatedPSBTsMetadata = [];
