@@ -21,7 +21,7 @@ const config = {
 			// 'pls-liquid': '../pls-lib/packages/pls-liquid',
 			// 'pls-nostr': '../pls-lib/packages/pls-nostr'
 		},
-		adapter: adapter({ runtime: 'nodejs20.x' })
+		adapter: adapter({ runtime: 'nodejs24.x' })
 	}
 };
 

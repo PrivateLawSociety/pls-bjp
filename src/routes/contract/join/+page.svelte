@@ -248,8 +248,8 @@
 		}
 
 		const multisig = multisigGen.createMultisig({
-			parts: clients.map((pubkey) => Uint8Array.from(Buffer.from('02' + pubkey.slice(-64), 'hex'))),
-			arbitrators: arbitrators.map((pubkey) => Uint8Array.from(Buffer.from('02' + pubkey.slice(-64), 'hex'))),
+			parts: clients.map((pubkey) => Uint8Array.from(Buffer.from(pubkey.slice(-64), 'hex'))),
+			arbitrators: arbitrators.map((pubkey) => Uint8Array.from(Buffer.from(pubkey.slice(-64), 'hex'))),
 			quorum: arbitratorsQuorum,
 			network: getMultisigNetworkByNetworkName(networkName),
 			internalPubkey

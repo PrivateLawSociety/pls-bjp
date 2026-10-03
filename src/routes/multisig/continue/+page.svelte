@@ -235,7 +235,7 @@
 		} else {
 			generatedPSBTsMetadata = await Promise.all(
 				psbtsMetadata
-					.filter(({ pubkeys }) => pubkeys.includes('02' + pubkey))
+					.filter(({ pubkeys }) => pubkeys.includes(pubkey))
 					.map(async (metadata) => {
 						const psbt = Psbt.fromHex(metadata.psbtHex, { network: network });
 
